@@ -91,6 +91,17 @@ export function PostCard({ post }: { post: PostProps }) {
     setStatus('모집완료')
   }
 
+  const handleKakaoT = () => {
+    // 모바일 기기인지 간단히 체크
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    if (isMobile) {
+      // 카카오 T 딥링크 실행
+      window.location.href = 'kakaot://'
+    } else {
+      alert('모바일 기기에서 탭하여 카카오 T 앱을 실행해 주세요!')
+    }
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const month = date.getMonth() + 1
@@ -140,16 +151,16 @@ export function PostCard({ post }: { post: PostProps }) {
           </div>
         </div>
 
-        {/* 조기 출발 안내 문구 (참여자에게만) */}
-        {!isAuthor && isEarlyDeparted && (
-          <div className="bg-blue-50 text-blue-700 p-2.5 rounded-md text-xs font-medium border border-blue-100 mt-2">
-            방장에 의해 모집이 조기 마감되었습니다. 지금 출발합니다! 🏃‍♂️
+        {/* 마감 안내 문구 (참여자에게만 노출) */}
+        {!isAuthor && isFull && (
+          <div className="bg-blue-50 text-blue-700 p-2.5 rounded-md text-xs font-medium border border-blue-100 mt-2 text-center">
+            모집이 마감되었습니다. 방장이 택시를 호출합니다! 🚕
           </div>
         )}
       </CardContent>
       <CardFooter className="pt-0 flex flex-col gap-2">
-        {/* 방장 전용 버튼 영역 */}
-        {isAuthor && (
+        {/* 방장 전용 뷰 */}
+        {isAuthor ? (
           <div className="w-full mb-1">
             {status === '모집중' && !isFull ? (
               <Button 
@@ -162,36 +173,36 @@ export function PostCard({ post }: { post: PostProps }) {
               </Button>
             ) : (
               <Button 
-                className="w-full bg-[#181919] hover:bg-[#181919]/90 text-white font-semibold flex items-center gap-2"
-                onClick={() => window.open('https://t.kakao.com/', '_blank')}
+                className="w-full bg-[#181919] hover:bg-[#181919]/90 text-white font-semibold flex items-center justify-center gap-2"
+                onClick={handleKakaoT}
               >
                 <Navigation className="w-4 h-4" />
-                🚕 카카오 T 열기
+                🚕 카카오 T로 택시 부르기
               </Button>
             )}
           </div>
-        )}
-
-        {/* 일반 참여 버튼 영역 */}
-        {(!isAuthor || isJoined) && (
-          isJoined ? (
-            <Button 
-              variant="outline" 
-              className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] border-none font-semibold flex items-center gap-2"
-              onClick={() => window.open(post.kakaoLink, '_blank')}
-            >
-              <MessageCircle className="w-4 h-4" />
-              카카오톡 오픈채팅방 열기
-            </Button>
-          ) : (
-            <Button 
-              className={`w-full font-medium ${isFull ? 'bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-not-allowed' : 'bg-[#006341] hover:bg-[#006341]/90 text-white'}`}
-              onClick={handleJoin}
-              disabled={isFull || isLoading}
-            >
-              {isLoading ? '처리 중...' : isFull ? '모집이 마감되었습니다' : '합승 참여하기'}
-            </Button>
-          )
+        ) : (
+          /* 참여자 전용 뷰 */
+          <div className="w-full">
+            {isJoined ? (
+              <Button 
+                variant="outline" 
+                className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] border-none font-semibold flex items-center justify-center gap-2"
+                onClick={() => window.open(post.kakaoLink, '_blank')}
+              >
+                <MessageCircle className="w-4 h-4" />
+                카카오톡 오픈채팅방 열기
+              </Button>
+            ) : (
+              <Button 
+                className={`w-full font-medium ${isFull ? 'bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-not-allowed' : 'bg-[#006341] hover:bg-[#006341]/90 text-white'}`}
+                onClick={handleJoin}
+                disabled={isFull || isLoading}
+              >
+                {isLoading ? '처리 중...' : isFull ? '모집이 마감되었습니다' : '합승 참여하기'}
+              </Button>
+            )}
+          </div>
         )}
       </CardFooter>
     </Card>
