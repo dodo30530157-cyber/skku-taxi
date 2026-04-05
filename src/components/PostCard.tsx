@@ -17,6 +17,7 @@ interface PostProps {
   kakaoLink: string
   status: string
   isJoined?: boolean
+  toss_id?: string
 }
 
 export function PostCard({ post }: { post: PostProps }) {
@@ -183,16 +184,27 @@ export function PostCard({ post }: { post: PostProps }) {
           </div>
         ) : (
           /* 참여자 전용 뷰 */
-          <div className="w-full">
+          <div className="w-full flex flex-col gap-2">
             {isJoined ? (
-              <Button 
-                variant="outline" 
-                className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] border-none font-semibold flex items-center justify-center gap-2"
-                onClick={() => window.open(post.kakaoLink, '_blank')}
-              >
-                <MessageCircle className="w-4 h-4" />
-                카카오톡 오픈채팅방 열기
-              </Button>
+              <>
+                <Button 
+                  variant="outline" 
+                  className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-[#000000] border-none font-semibold flex items-center justify-center gap-2"
+                  onClick={() => window.open(post.kakaoLink, '_blank')}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  카카오톡 오픈채팅방 열기
+                </Button>
+                {/* 토스 정산 버튼 추가 - 모집완료 상태일 때만 */}
+                {isFull && post.toss_id && (
+                  <Button
+                    className="w-full bg-[#3182F6] hover:bg-[#1C6CD9] text-white font-semibold flex items-center justify-center gap-2 border-none"
+                    onClick={() => window.open(`https://toss.me/${post.toss_id}`, '_blank')}
+                  >
+                    💸 토스로 정산하기
+                  </Button>
+                )}
+              </>
             ) : (
               <Button 
                 className={`w-full font-medium ${isFull ? 'bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-not-allowed' : 'bg-[#006341] hover:bg-[#006341]/90 text-white'}`}

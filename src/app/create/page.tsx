@@ -27,7 +27,8 @@ export default function CreatePostPage() {
       maxPeople: Number(formData.get('maxPeople')),
       currentPeople: 1, // 방장은 자동으로 참여
       kakaoLink: formData.get('kakao') as string,
-      status: '모집중'
+      status: '모집중',
+      toss_id: formData.get('toss_id') as string || null,
     }
 
     // Supabase posts 테이블에 저장하고 삽입된 결과(id 포함)를 반환받음
@@ -96,6 +97,19 @@ export default function CreatePostPage() {
                   <option value="4">4명 (최대)</option>
                 </select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="toss_id">내 토스 아이디 (선택)</Label>
+              <Input
+                name="toss_id"
+                id="toss_id"
+                type="text"
+                placeholder="toss.me/ 뒤에 오는 아이디 (예: mytossid)"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                합승 완료 후 정산할 때 사용됩니다.
+              </p>
             </div>
 
             <div className="space-y-2">
