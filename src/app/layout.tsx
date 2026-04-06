@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
 import { AuthNav } from '@/components/AuthNav'
+import { SplashScreen } from '@/components/SplashScreen'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="ko">
       <head />
       <body className={inter.className}>
+        <SplashScreen />
         <div className="min-h-screen bg-gray-50 flex flex-col">
           {/* ── 헤더 ── */}
           <header className="bg-white border-b border-gray-100 sticky top-0 z-30 w-full shadow-[0_1px_12px_rgba(0,0,0,0.06)]">
