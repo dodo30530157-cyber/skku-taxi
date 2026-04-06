@@ -7,24 +7,24 @@ export function SplashScreen() {
   const [phase, setPhase] = useState<1 | 2 | 3>(1)
 
   useEffect(() => {
-    // 테스트용 조건 무시 (실제 배포 전엔 주석 해제)
-    const hasSeenSplash = false // sessionStorage.getItem('splash_shown')
+    // 개발 테스트를 위해 세션 스토리지 체크 무시.
+    // [중요] 실제 상용 배포에서는 sessionStorage.getItem('splash_shown') 로 복구!
+    const hasSeenSplash = false 
     
     if (!hasSeenSplash) {
-      // 1단계 (0~2s): 택시가 산길 올라가기 -> 2초 뒤 2단계로 전환(텍스트 등장 및 길/택시 페이드아웃)
+      // 1. 초기 3초 주행 후 배경색 반전(White) 및 텍스트 페이드인 전환
       const p1Timer = setTimeout(() => {
         setPhase(2)
-      }, 2000)
+      }, 3000)
 
-      // 3단계 (4.5s): 스플래시 전체 어두워지기 (메인 화면 전환 시작)
+      // 2. 4.8초에 전체 스크린 사라지기 시작 (부드럽게 페이드아웃)
       const p2Timer = setTimeout(() => {
         setPhase(3)
-      }, 4500)
+      }, 4800)
 
-      // 완전 종료 (5.0s): 컴포넌트 마운트 해제
+      // 3. 5초에 무조건 언마운트
       const endTimer = setTimeout(() => {
         setShow(false)
-        // 정상 서비스 후에는 여기서 setItem 실행
         // sessionStorage.setItem('splash_shown', 'true')
       }, 5000)
 
@@ -42,43 +42,51 @@ export function SplashScreen() {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#006341] 
-        transition-opacity duration-500 ease-in-out ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center 
+        transition-all duration-[1500ms] ease-in-out ${
+        phase >= 2 ? 'bg-white' : 'bg-[#006341]'
+      } ${
         phase === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
       <div className="relative w-full h-full flex flex-col items-center justify-center">
         
-        {/* Phase 1: 구불길과 미니멀 택시 애니메이션 */}
+        {/* Phase 1: 얇은 화이트 라인의 은행잎 & 꼬마 택시 주행 (3초 되면 페이드아웃) */}
         <div 
-          className={`absolute w-[300px] h-[400px] flex items-center justify-center transition-opacity duration-1000 ease-in-out ${
+          className={`absolute w-[300px] h-[300px] flex items-center justify-center 
+            transition-opacity duration-1000 ease-in-out ${
             phase === 1 ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <svg viewBox="0 0 300 400" className="w-full h-full overflow-visible">
-            {/* 산길 / 구불구불한 얇고 서정적인 오르막길 선 (반투명 화이트) */}
+          <svg viewBox="0 0 100 100" className="w-[180px] h-[180px] overflow-visible">
+            {/* 정제된 은행잎 라인아트 윤곽선 */}
             <path 
-              id="windingRoad" 
-              d="M 40 320 C 200 320, 80 180, 150 180 C 220 180, 100 40, 260 40" 
+              id="ginkgoPath" 
+              d="M 50 95 
+                 C 50 85 50 75 50 75 
+                 C 15 70 -5 35 20 15 
+                 C 35 5 45 30 50 50 
+                 C 55 30 65 5 80 15 
+                 C 105 35 85 70 50 75" 
               fill="none" 
-              stroke="rgba(255,255,255,0.4)" 
-              strokeWidth="2" 
+              stroke="rgba(255, 255, 255, 0.4)" 
+              strokeWidth="1.5" 
               strokeLinecap="round" 
+              strokeLinejoin="round" 
             />
             
-            {/* 미니멀 꼬마 택시 */}
-            {/* SVG animateMotion을 사용해 길을 아주 완벽하게 따라가며, rotate="auto"로 방향도 자동 맞춤 */}
+            {/* 아주 작고 미니멀한 화이트 실루엣 택시 */}
+            {/* animateMotion을 써서 정확히 3초간 은행잎 테두리를 유유히 흐름 */}
             <g fill="#ffffff">
               {/* 차체 */}
-              <rect x="-12" y="-6" width="24" height="8" rx="2" />
-              {/* 위에 튀어나온 택시 캡 영역 (미니멀) */}
-              <path d="M -4 -6 L -1 -10 L 7 -10 L 10 -6 Z" />
-              {/* 바퀴 2개 */}
-              <circle cx="-6" cy="2" r="3" fill="#006341" />
-              <circle cx="6" cy="2" r="3" fill="#006341" />
+              <rect x="-4" y="-2" width="8" height="3" rx="1" />
+              {/* 택시 캡(뚜껑) */}
+              <path d="M -2 -2 L -1 -3.5 L 2 -3.5 L 3 -2 Z" />
+              <circle cx="-2" cy="1" r="1.2" fill="#006341" className={`transition-colors duration-[1500ms] ${phase >= 2 ? 'fill-white' : 'fill-[#006341]'}`} />
+              <circle cx="2" cy="1" r="1.2" fill="#006341" className={`transition-colors duration-[1500ms] ${phase >= 2 ? 'fill-white' : 'fill-[#006341]'}`} />
               
               <animateMotion 
-                dur="1.95s" 
+                dur="2.9s" 
                 fill="freeze" 
                 keyPoints="0;1" 
                 keyTimes="0;1" 
@@ -86,19 +94,19 @@ export function SplashScreen() {
                 keySplines="0.4 0 0.2 1" 
                 rotate="auto"
               >
-                <mpath href="#windingRoad" />
+                <mpath href="#ginkgoPath" />
               </animateMotion>
             </g>
           </svg>
         </div>
 
-        {/* Phase 2: 스꾸택시 폰트 페이드인 (미니멀, 굵게, 군더더기 제로) */}
+        {/* Phase 2: 스꾸택시 폰트 페이드인 (배경이 하얘질 때 딥그린 글씨로 등장) */}
         <div 
-          className={`absolute flex flex-col items-center justify-center transition-all duration-[1500ms] ease-out ${
+          className={`absolute flex flex-col items-center justify-center transition-all duration-[1200ms] ease-out delay-500 ${
             phase >= 2 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
           }`}
         >
-          <h1 className="text-5xl sm:text-6xl font-black text-white tracking-widest">
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-[#006341] tracking-widest drop-shadow-sm">
             스꾸택시
           </h1>
         </div>
