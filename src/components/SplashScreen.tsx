@@ -7,10 +7,9 @@ export function SplashScreen() {
   const [fade, setFade] = useState(false)
 
   useEffect(() => {
-    // 세션 스토리지: 브라우저 탭을 열고 닫을 때까지 유지됨 (앱을 완전히 껐다 켤 때 1회)
-    const hasSeenSplash = sessionStorage.getItem('splash_shown')
+    // 테스트를 위해 세션 스토리지 체크 임시 무시 (매번 무조건 스플래시 발생)
+    const hasSeenSplash = false // sessionStorage.getItem('splash_shown')
     
-    // 개발 모드에서 매번 테스트하기 위해 || true 추가해도 되지만, 일단 기획대로 구현
     if (!hasSeenSplash) {
       setShow(true)
       
@@ -22,7 +21,7 @@ export function SplashScreen() {
       // 3초 후 컴포넌트 완전히 언마운트 (자동 전환)
       const hideTimer = setTimeout(() => {
         setShow(false)
-        sessionStorage.setItem('splash_shown', 'true')
+        // 나중에 다시 활성화 시 사용: sessionStorage.setItem('splash_shown', 'true')
       }, 3000)
 
       return () => {
