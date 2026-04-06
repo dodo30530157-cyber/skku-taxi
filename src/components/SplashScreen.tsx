@@ -48,19 +48,16 @@ export function SplashScreen() {
     >
       <div className="flex flex-col items-center animate-in zoom-in-[0.97] fade-in duration-[1200ms] w-full px-8 max-w-[400px]">
         
-        {/* 압도적인 타이포그래피 (크기, 굵기, 고급 그라데이션, 블러 및 섀도우 극대화) */}
+        {/* 압도적인 타이포그래피 (크기 8xl, 굵기, 금빛 프리미엄 그라데이션, 블러 및 섀도우 극대화) */}
         <h1 
-          className="text-7xl font-black tracking-tighter drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] mb-3 
-                     bg-gradient-to-b from-[#ffffff] via-[#f8fff8] to-[#99d1b8] bg-clip-text text-transparent
+          className="text-8xl font-black tracking-tighter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] mb-20
+                     bg-gradient-to-b from-[#FFF2A8] via-[#FFD700] to-[#B8860B] bg-clip-text text-transparent
                      relative"
         >
           {/* 뒤에 은은한 빛 반사(Glow) 효과를 추가 */}
-          <span className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent bg-clip-text text-transparent blur-md">스꾸택시</span>
+          <span className="absolute inset-0 bg-gradient-to-b from-[#FFF2A8]/30 to-transparent bg-clip-text text-transparent blur-md">스꾸택시</span>
           스꾸택시
         </h1>
-        <p className="text-emerald-50/90 font-extrabold text-[12px] tracking-[0.5em] uppercase mb-24 drop-shadow-xl relative left-1 text-center">
-          프리미엄 지식인 합승 플랫폼
-        </p>
 
         {/* 애니메이션 컴포넌트 영역 (가장 고급스러운 도로 묘사) */}
         <div className="relative w-full h-[80px] border-b-[2px] border-gradient-to-r from-transparent via-white/40 to-transparent mb-8">
