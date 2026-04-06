@@ -8,24 +8,25 @@ export function SplashScreen() {
   const [isDriving, setIsDriving] = useState(false)
 
   useEffect(() => {
-    // 배포 시 항상 동작하도록 강제 제어된 로직 (이후 한 번만 보이게 하려면 session storage 활용)
+    // 임시 테스트용 조건 무시.
+    // [중요] 실제 상용 배포에서는 sessionStorage.getItem('splash_shown') 로 켜줍니다.
     const hasSeenSplash = false 
     
     if (!hasSeenSplash) {
-      // 0.1초 뒤 택시 주행 시작 애니메이션 트리거
+      // 컴포넌트 마운트 아주 직후 애니메이션 큐를 굴리기 위해 50ms 대기
       const driveTimer = setTimeout(() => {
         setIsDriving(true)
-      }, 100)
+      }, 50)
 
-      // 4.5초(4500ms) 후 페이드 아웃 시작
+      // 전체 7초 중 6.5초에서 페이드아웃 진입
       const fadeTimer = setTimeout(() => {
         setFade(true)
-      }, 4500)
+      }, 6500)
 
-      // 5초(5000ms) 후 컴포넌트 완전히 언마운트
+      // 7초(7000ms)에 컴포넌트 폐기 및 본문으로 전환
       const hideTimer = setTimeout(() => {
         setShow(false)
-      }, 5000)
+      }, 7000)
 
       return () => {
         clearTimeout(driveTimer)
@@ -41,56 +42,161 @@ export function SplashScreen() {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#006341] transition-opacity duration-500 ease-out ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#005133] transition-opacity duration-[700ms] ease-out ${
         fade ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
-      <div className="flex flex-col items-center animate-in zoom-in-90 fade-in duration-1000 ease-out fill-mode-forwards w-full px-8 max-w-sm">
+      <div className="flex flex-col items-center animate-in zoom-in-[0.97] fade-in duration-[1200ms] w-full px-8 max-w-[400px]">
         
-        {/* 중앙 워드마크 */}
-        <h1 className="text-6xl font-black text-white tracking-tighter drop-shadow-md mb-2">
+        {/* 압도적인 타이포그래피 (크기, 굵기, 고급 그라데이션, 블러 및 섀도우 극대화) */}
+        <h1 
+          className="text-7xl font-black tracking-tighter drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] mb-3 
+                     bg-gradient-to-b from-[#ffffff] via-[#f8fff8] to-[#99d1b8] bg-clip-text text-transparent
+                     relative"
+        >
+          {/* 뒤에 은은한 빛 반사(Glow) 효과를 추가 */}
+          <span className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent bg-clip-text text-transparent blur-md">스꾸택시</span>
           스꾸택시
         </h1>
-        <p className="text-emerald-100/90 font-bold text-sm tracking-[0.2em] uppercase mb-16">
-          성대 택시 합승 플랫폼
+        <p className="text-emerald-50/90 font-extrabold text-[12px] tracking-[0.5em] uppercase mb-24 drop-shadow-xl relative left-1 text-center">
+          프리미엄 지식인 합승 플랫폼
         </p>
 
-        {/* 애니메이션 컴포넌트 영역 (도로) */}
-        <div className="relative w-full h-16 border-b-[3px] border-white/20 mb-8 overflow-visible">
-          {/* 도착지 마커 (황금색 은행잎 SVG) - 우측 끝 고정 */}
-          <div className="absolute right-0 bottom-1 flex flex-col items-center">
-            {/* 성균관대 상징 황금 은행잎 */}
+        {/* 애니메이션 컴포넌트 영역 (가장 고급스러운 도로 묘사) */}
+        <div className="relative w-full h-[80px] border-b-[2px] border-gradient-to-r from-transparent via-white/40 to-transparent mb-8">
+          
+          {/* 도로 라인 자체에도 은은한 그라데이션 적용 */}
+          <div className="absolute bottom-[-2px] inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+
+          {/* 도착지 마커 (황금 은행잎 SVG - 극강의 디테일) */}
+          <div className="absolute right-[-10px] bottom-[-20px] flex flex-col items-center z-10 filter drop-shadow-[0_0_20px_rgba(255,215,0,0.4)]">
             <svg 
               viewBox="0 0 100 100" 
-              className="w-12 h-12 text-[#FFD200] drop-shadow-lg" 
-              fill="currentColor" 
+              className="w-[5.5rem] h-[5.5rem]" 
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M50 15 C 10 10, -5 50, 15 80 C 25 95, 45 92, 48 85 L 50 100 L 52 85 C 55 92, 75 95, 85 80 C 105 50, 90 10, 50 15 Z M 50 30 C 65 30, 75 50, 65 65 C 60 55, 50 50, 50 70 C 50 50, 40 55, 35 65 C 25 50, 35 30, 50 30 Z" />
+              <defs>
+                <linearGradient id="premiumGold" x1="0%" y1="0%" x2="10% " y2="100%">
+                  <stop offset="0%" stopColor="#FFF2A8" />
+                  <stop offset="40%" stopColor="#FFD700" />
+                  <stop offset="80%" stopColor="#DAA520" />
+                  <stop offset="100%" stopColor="#A87A00" />
+                </linearGradient>
+                <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              <g filter="url(#goldGlow)">
+                {/* 은행잎 형태의 우아한 베지에 곡선 */}
+                <path 
+                  d="M 50 95 
+                     L 50 70 
+                     C 15 65 -5 30 20 10 
+                     C 35 -5 45 20 50 45 
+                     C 55 20 65 -5 80 10 
+                     C 105 30 85 65 50 70" 
+                  fill="url(#premiumGold)" 
+                  stroke="#FFD700"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </g>
             </svg>
-            <div className="text-[10px] text-[#FFD200] font-bold mt-1 tracking-widest">SKKU</div>
           </div>
           
-          {/* 달리는 택시 - 좌측에서 우측으로 이동 */}
-          {/* translate-x 속도: 4000ms duration, ease-in-out으로 웅크렸다가 자연스럽게 가속 및 감속 */}
+          {/* 
+            달리는 [프리미엄 블랙 택시] - 주행 애니메이션
+            - 딱 5000ms 지속 
+            - Tailwind 최고급 감속 ease 곡선: ease-[cubic-bezier(0.1,1,0.3,1)]
+            => 초반엔 아주 경쾌하게 치고 나가서, 도착지부터는 깃털이 내려앉듯 아름답게 감속 정차
+          */}
           <div 
-            className={`absolute bottom-[3px] transition-transform duration-[4000ms] ease-in-out pl-1 ${
-              isDriving ? 'translate-x-[calc(100vw-9rem)] sm:translate-x-[18rem]' : 'translate-x-[0px]'
+            className={`absolute bottom-[6px] transition-transform duration-[5000ms] ease-[cubic-bezier(0.1,1,0.3,1)] z-20 origin-bottom ${
+              isDriving ? 'translate-x-[calc(100vw-8.5rem)] sm:translate-x-[16.5rem]' : 'translate-x-[-20px]'
             }`}
           >
-            {/* 택시 SVG 로고 */}
-            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/10 border-b-4 border-[#e0e0e0]">
-              <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 text-[#006341]" xmlns="http://www.w3.org/2000/svg">
-                {/* 택시 상단 구조 */}
-                <path d="M6 10L8 6H16L18 10" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
-                {/* 본체 */}
-                <rect x="3" y="10" width="18" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-                {/* 바퀴 */}
-                <circle cx="7" cy="17" r="2" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-                <circle cx="17" cy="17" r="2" stroke="currentColor" strokeWidth="1.6" fill="none"/>
-                {/* 표시등 펄스 */}
-                <circle cx="12" cy="5" r="1.5" fill="#FFD200" className="animate-pulse duration-1000" />
+            {/* 정밀 작화 프리미엄 택시 측면 실루엣 */}
+            <div className="relative drop-shadow-[0_15px_15px_rgba(0,0,0,0.8)]">
+              <svg viewBox="0 0 200 60" className="w-[110px] h-auto" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  {/* 고급 검정 세단 도장면 광택 느낌 */}
+                  <linearGradient id="bodyPaint" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" stopColor="#374151" />
+                    <stop offset="30%" stopColor="#111827" />
+                    <stop offset="100%" stopColor="#030712" />
+                  </linearGradient>
+                  {/* 프라이버시 틴팅 글라스 라인 */}
+                  <linearGradient id="windowTint" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#003322" />
+                    <stop offset="100%" stopColor="#051009" />
+                  </linearGradient>
+                  <linearGradient id="goldCap" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FFF2A8" />
+                    <stop offset="100%" stopColor="#DAA520" />
+                  </linearGradient>
+                </defs>
+
+                {/* 1. 택시 표시등 (루프 캡) */}
+                <path d="M 85 4 L 92 0 L 110 0 L 115 4 Z" fill="url(#goldCap)" />
+                <rect x="96" y="1" width="10" height="2" fill="#fff" opacity="0.8" />
+                
+                {/* 2. 유려한 세단 바디 */}
+                <path 
+                  d="M 10 40 
+                     C 5 40 3 35 3 30 
+                     C 3 25 10 20 20 20 
+                     L 45 18 
+                     L 65 7 
+                     C 75 3 95 2 120 4 
+                     L 155 12 
+                     L 175 16 
+                     C 185 18 190 20 195 25 
+                     C 198 30 196 40 185 41 
+                     L 155 41 
+                     C 155 30 135 30 135 41 
+                     L 75 41 
+                     C 75 30 55 30 55 41 
+                     L 20 41 Z" 
+                  fill="url(#bodyPaint)" 
+                />
+
+                {/* 3. 사이드 윈도우 글라스 */}
+                <path d="M 70 8 C 80 4 100 3 120 5 L 145 13 L 145 17 L 62 17 Z" fill="url(#windowTint)" />
+                <path d="M 68 8 L 62 17" stroke="#374151" strokeWidth="2" />
+                {/* B 필러 */}
+                <rect x="108" y="4" width="6" height="13" fill="#030712" />
+
+                {/* 4. 헤드램프 / 테일램프 라이트 */}
+                {/* 뒤빨간등 */}
+                <path d="M 4 23 L 8 23 L 8 27 L 4 28 Z" fill="#EF4444" />
+                <path d="M 2 25 L 15 25" stroke="#FCA5A5" strokeWidth="1" filter="blur(2px)" opacity="0.6" />
+                {/* 앞흰등 (데이라이트) */}
+                <path d="M 188 22 L 195 22 L 193 25 L 188 25 Z" fill="#F3F4F6" />
+                <circle cx="195" cy="23" r="5" fill="#ffffff" filter="blur(3px)" opacity="0.5" />
+
+                {/* 5. 프리미엄 스포크 휠 */}
+                <circle cx="65" cy="41" r="12" fill="#030712" />
+                <circle cx="145" cy="41" r="12" fill="#030712" />
+                <circle cx="65" cy="41" r="7" fill="none" stroke="#9CA3AF" strokeWidth="2.5" />
+                <circle cx="145" cy="41" r="7" fill="none" stroke="#9CA3AF" strokeWidth="2.5" />
+                <circle cx="65" cy="41" r="3" fill="#E5E7EB" />
+                <circle cx="145" cy="41" r="3" fill="#E5E7EB" />
               </svg>
+
+              {/* 아주 은은한 속도 잔상 이펙트 */}
+              <div 
+                className={`absolute top-[45%] right-[95%] w-16 h-[1.5px] bg-gradient-to-l from-white/30 to-transparent blur-[1px] transition-all duration-700 ${
+                  isDriving ? 'opacity-100' : 'opacity-0 scale-x-0'
+                }`}
+                style={{ transformOrigin: 'right' }}
+              />
+              <div 
+                className={`absolute top-[65%] right-[95%] w-24 h-[1px] bg-gradient-to-l from-white/20 to-transparent blur-[1px] transition-all duration-700 delay-150 ${
+                  isDriving ? 'opacity-100' : 'opacity-0 scale-x-0'
+                }`}
+                style={{ transformOrigin: 'right' }}
+              />
             </div>
           </div>
         </div>
