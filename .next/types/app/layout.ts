@@ -1,4 +1,4 @@
-// File: /Users/doeulkim/.gemini/antigravity/scratch/skku-taxi/src/app/layout.tsx
+// File: /Users/doeulkim/skku-taxi/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

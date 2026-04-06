@@ -1,4 +1,4 @@
-// File: /Users/doeulkim/.gemini/antigravity/scratch/skku-taxi/src/app/create/page.tsx
+// File: /Users/doeulkim/skku-taxi/src/app/create/page.tsx
 import * as entry from '../../../../src/app/create/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
