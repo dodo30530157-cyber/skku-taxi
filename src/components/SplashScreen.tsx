@@ -21,11 +21,11 @@ export function SplashScreen() {
         setPhase(3)
       }, 4000)
 
-      // 3. 4.5초에 완전히 언마운트 (메인화면 진입 완료)
+      // 3. 5.5초에 완전히 언마운트 (페이드아웃 애니메이션 1.5초를 정확히 기다려줌: Cross-fade 보장)
       const endTimer = setTimeout(() => {
         setShow(false)
         // sessionStorage.setItem('splash_shown', 'true')
-      }, 4500)
+      }, 5500)
 
       return () => {
         clearTimeout(p1Timer)
@@ -42,7 +42,7 @@ export function SplashScreen() {
   return (
     <div 
       className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#006341] 
-        transition-opacity duration-500 ease-in-out ${
+        transition-opacity duration-[1500ms] ease-in-out ${
         phase === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
@@ -95,14 +95,14 @@ export function SplashScreen() {
         </div>
 
         {/* Phase 2: 스꾸택시 폰트 페이드인 (토스/배민 감성의 압도적 깔끔함) */}
-        {/* 극강의 쫀득한 ease-out 곡선을 통해 살짝 올라오며 나타남 */}
+        {/* 극강의 쫀득한 ease-out 곡선, 물속에서 떠오르듯 duration-2000ms의 긴 호흡 */}
         <div 
           className={`absolute flex flex-col items-center justify-center 
-            transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
             phase >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
-          <h1 className="text-[40px] sm:text-5xl font-black text-white tracking-tighter drop-shadow-sm">
+          <h1 className="text-[52px] sm:text-6xl font-black text-white tracking-tighter drop-shadow-sm">
             스꾸택시
           </h1>
         </div>
