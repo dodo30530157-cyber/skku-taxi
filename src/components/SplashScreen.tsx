@@ -7,26 +7,25 @@ export function SplashScreen() {
   const [phase, setPhase] = useState<1 | 2 | 3>(1)
 
   useEffect(() => {
-    // 개발 테스트를 위해 세션 스토리지 체크 무시.
-    // [중요] 실제 상용 배포에서는 sessionStorage.getItem('splash_shown') 로 복구!
-    const hasSeenSplash = false 
+    // 테스트용 조건 무시 (실제 배포 전엔 주석 해제)
+    const hasSeenSplash = false // sessionStorage.getItem('splash_shown')
     
     if (!hasSeenSplash) {
-      // 1. 초기 3초 주행 후 배경색 반전(White) 및 텍스트 페이드인 전환
+      // 1. 초기 2.5초 주행 후 라인아트 페이드아웃 및 텍스트 등장
       const p1Timer = setTimeout(() => {
         setPhase(2)
-      }, 3000)
+      }, 2500)
 
-      // 2. 4.8초에 전체 스크린 사라지기 시작 (부드럽게 페이드아웃)
+      // 2. 4초에 스크린 전체 부드럽게 사라짐 시작 (페이드아웃)
       const p2Timer = setTimeout(() => {
         setPhase(3)
-      }, 4800)
+      }, 4000)
 
-      // 3. 5초에 무조건 언마운트
+      // 3. 4.5초에 완전히 언마운트 (메인화면 진입 완료)
       const endTimer = setTimeout(() => {
         setShow(false)
         // sessionStorage.setItem('splash_shown', 'true')
-      }, 5000)
+      }, 4500)
 
       return () => {
         clearTimeout(p1Timer)
@@ -42,16 +41,14 @@ export function SplashScreen() {
 
   return (
     <div 
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center 
-        transition-all duration-[1500ms] ease-in-out ${
-        phase >= 2 ? 'bg-white' : 'bg-[#006341]'
-      } ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#006341] 
+        transition-opacity duration-500 ease-in-out ${
         phase === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
       <div className="relative w-full h-full flex flex-col items-center justify-center">
         
-        {/* Phase 1: 얇은 화이트 라인의 은행잎 & 꼬마 택시 주행 (3초 되면 페이드아웃) */}
+        {/* Phase 1: 얇은 화이트 라인의 은행잎 & 택시 주행 (2.5초 이후 부드럽게 사라짐) */}
         <div 
           className={`absolute w-[300px] h-[300px] flex items-center justify-center 
             transition-opacity duration-1000 ease-in-out ${
@@ -75,18 +72,15 @@ export function SplashScreen() {
               strokeLinejoin="round" 
             />
             
-            {/* 아주 작고 미니멀한 화이트 실루엣 택시 */}
-            {/* animateMotion을 써서 정확히 3초간 은행잎 테두리를 유유히 흐름 */}
+            {/* 꼬마 택시 윤곽 */}
             <g fill="#ffffff">
-              {/* 차체 */}
               <rect x="-4" y="-2" width="8" height="3" rx="1" />
-              {/* 택시 캡(뚜껑) */}
               <path d="M -2 -2 L -1 -3.5 L 2 -3.5 L 3 -2 Z" />
-              <circle cx="-2" cy="1" r="1.2" fill="#006341" className={`transition-colors duration-[1500ms] ${phase >= 2 ? 'fill-white' : 'fill-[#006341]'}`} />
-              <circle cx="2" cy="1" r="1.2" fill="#006341" className={`transition-colors duration-[1500ms] ${phase >= 2 ? 'fill-white' : 'fill-[#006341]'}`} />
+              <circle cx="-2" cy="1" r="1.2" fill="#006341" />
+              <circle cx="2" cy="1" r="1.2" fill="#006341" />
               
               <animateMotion 
-                dur="2.9s" 
+                dur="2.4s" 
                 fill="freeze" 
                 keyPoints="0;1" 
                 keyTimes="0;1" 
@@ -100,13 +94,15 @@ export function SplashScreen() {
           </svg>
         </div>
 
-        {/* Phase 2: 스꾸택시 폰트 페이드인 (배경이 하얘질 때 딥그린 글씨로 등장) */}
+        {/* Phase 2: 스꾸택시 폰트 페이드인 (토스/배민 감성의 압도적 깔끔함) */}
+        {/* 극강의 쫀득한 ease-out 곡선을 통해 살짝 올라오며 나타남 */}
         <div 
-          className={`absolute flex flex-col items-center justify-center transition-all duration-[1200ms] ease-out delay-500 ${
-            phase >= 2 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+          className={`absolute flex flex-col items-center justify-center 
+            transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            phase >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-[#006341] tracking-widest drop-shadow-sm">
+          <h1 className="text-[40px] sm:text-5xl font-black text-white tracking-tighter drop-shadow-sm">
             스꾸택시
           </h1>
         </div>
