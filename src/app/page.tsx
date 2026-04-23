@@ -195,9 +195,10 @@ export default function Home() {
         </div>
       ) : (
         /* ── 지도 뷰 ── */
-        <div className="w-full h-[calc(100vh-320px)] min-h-[400px] rounded-3xl overflow-hidden shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-10">
+        <div className="w-full h-[500px] md:h-[calc(100vh-250px)] rounded-3xl overflow-hidden shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-10">
           <KakaoMap 
             center={mapCenter} 
+            className="w-full h-full"
             style={{ width: "100%", height: "100%" }} 
             level={4}
             onClick={() => setSelectedPost(null)}

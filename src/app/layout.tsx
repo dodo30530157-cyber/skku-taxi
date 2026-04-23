@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
+import Script from 'next/script'
 import { AuthNav } from '@/components/AuthNav'
 import { SplashScreen } from '@/components/SplashScreen'
 
@@ -19,7 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <head />
+      <head>
+        <Script 
+          src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8b939f6f6f9fc5b0d00f7236e76cf0dc&autoload=false"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className={inter.className}>
         <SplashScreen />
         <div className="min-h-screen bg-gray-50 flex flex-col">
