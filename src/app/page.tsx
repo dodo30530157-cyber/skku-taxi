@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { PostCard } from '@/components/PostCard'
-import { Search, PlusCircle } from 'lucide-react'
+import { Search, PlusCircle, Map as MapIcon, List } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { Map as KakaoMap, MapMarker } from 'react-kakao-maps-sdk'
 
 const QUICK_CHIPS = [
   { label: '혜화역', icon: '🚉' },
@@ -26,6 +27,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [campusFilter, setCampusFilter] = useState('전체')
   const [searchQuery, setSearchQuery] = useState('')
+  
+  // 뷰 모드 및 지도 상태 추가
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
+  const [selectedPost, setSelectedPost] = useState<any>(null)
 
   useEffect(() => {
     // 세션 가져오기 및 구독
@@ -69,11 +74,14 @@ export default function Home() {
     return matchesCampus && matchesSearch
   })
 
+  // 성균관대 명륜캠퍼스 중심 좌표
+  const mapCenter = { lat: 37.5817849, lng: 126.9975608 }
+
   return (
     <div className="animate-in fade-in pb-36 mt-2 space-y-4">
 
       {/* ── 검색 히어로 영역 ── */}
-      <div className="space-y-3">
+      <div className="space-y-3 relative z-10">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-gray-900">
             어디로 가시나요?{' '}
@@ -118,7 +126,7 @@ export default function Home() {
       </div>
 
       {/* ── 캠퍼스 필터 & 카운트 ── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 relative z-10">
         <div className="flex gap-1.5 flex-1">
           {CAMPUS_FILTERS.map(c => (
             <button
@@ -141,61 +149,150 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── 합승 목록 ── */}
-      <div className="space-y-3">
-        {isLoading ? (
-          /* 스켈레톤 */
-          [1, 2, 3].map(key => (
-            <div key={key} className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5 space-y-3 animate-pulse">
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <div className="h-4 w-16 bg-gray-200 rounded-full" />
-                  <div className="h-5 w-44 bg-gray-200 rounded" />
+      {/* ── 콘텐츠 뷰 (리스트 또는 지도) ── */}
+      {viewMode === 'list' ? (
+        <div className="space-y-3 relative z-10">
+          {isLoading ? (
+            /* 스켈레톤 */
+            [1, 2, 3].map(key => (
+              <div key={key} className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5 space-y-3 animate-pulse">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <div className="h-4 w-16 bg-gray-200 rounded-full" />
+                    <div className="h-5 w-44 bg-gray-200 rounded" />
+                  </div>
+                  <div className="h-6 w-12 bg-gray-100 rounded-full" />
                 </div>
-                <div className="h-6 w-12 bg-gray-100 rounded-full" />
+                <div className="h-4 w-full bg-gray-100 rounded" />
+                <div className="h-4 w-2/3 bg-gray-100 rounded" />
+                <div className="h-2 w-full bg-gray-100 rounded-full" />
+                <div className="h-10 w-full bg-gray-100 rounded-xl" />
               </div>
-              <div className="h-4 w-full bg-gray-100 rounded" />
-              <div className="h-4 w-2/3 bg-gray-100 rounded" />
-              <div className="h-2 w-full bg-gray-100 rounded-full" />
-              <div className="h-10 w-full bg-gray-100 rounded-xl" />
+            ))
+          ) : filteredPosts.length === 0 ? (
+            /* ── 빈 상태 ── */
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-24 h-24 bg-[#006341]/5 rounded-full flex items-center justify-center mb-5">
+                <span className="text-5xl">🚕</span>
+              </div>
+              <p className="text-lg font-bold text-gray-800">
+                {searchQuery ? `"${searchQuery}" 검색 결과가 없어요` : '아직 등록된 합승이 없어요'}
+              </p>
+              <p className="text-sm text-gray-400 mt-1 mb-7">
+                {searchQuery ? '다른 키워드로 검색해 보거나 새 합승을 만들어보세요!' : '첫 번째 방장이 되어보세요!'}
+              </p>
+              <Link href="/create" onClick={handleCreateClick}>
+                <button className="px-7 py-3.5 bg-[#006341] text-white font-bold rounded-2xl shadow-md hover:bg-[#006341]/90 transition-all active:scale-95 text-sm">
+                  🚀 합승 만들기
+                </button>
+              </Link>
             </div>
-          ))
-        ) : filteredPosts.length === 0 ? (
-          /* ── 빈 상태 ── */
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-24 h-24 bg-[#006341]/5 rounded-full flex items-center justify-center mb-5">
-              <span className="text-5xl">🚕</span>
-            </div>
-            <p className="text-lg font-bold text-gray-800">
-              {searchQuery ? `"${searchQuery}" 검색 결과가 없어요` : '아직 등록된 합승이 없어요'}
-            </p>
-            <p className="text-sm text-gray-400 mt-1 mb-7">
-              {searchQuery ? '다른 키워드로 검색해 보거나 새 합승을 만들어보세요!' : '첫 번째 방장이 되어보세요!'}
-            </p>
-            <Link href="/create" onClick={handleCreateClick}>
-              <button className="px-7 py-3.5 bg-[#006341] text-white font-bold rounded-2xl shadow-md hover:bg-[#006341]/90 transition-all active:scale-95 text-sm">
-                🚀 합승 만들기
-              </button>
-            </Link>
-          </div>
-        ) : (
-          filteredPosts.map(post => (
-            <PostCard key={post.id} post={post} />
-          ))
-        )}
-      </div>
+          ) : (
+            filteredPosts.map(post => (
+              <PostCard key={post.id} post={post} />
+            ))
+          )}
+        </div>
+      ) : (
+        /* ── 지도 뷰 ── */
+        <div className="w-full h-[calc(100vh-320px)] min-h-[400px] rounded-3xl overflow-hidden shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-10">
+          <KakaoMap 
+            center={mapCenter} 
+            style={{ width: "100%", height: "100%" }} 
+            level={4}
+            onClick={() => setSelectedPost(null)}
+          >
+            {filteredPosts.map(post => (
+              post.lat && post.lng && (
+                <MapMarker 
+                  key={post.id}
+                  position={{ lat: post.lat, lng: post.lng }}
+                  onClick={() => setSelectedPost(post)}
+                />
+              )
+            ))}
+          </KakaoMap>
+        </div>
+      )}
 
-      {/* ── FAB: 플로팅 합승 만들기 버튼 ── */}
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-40">
-        <div className="w-full max-w-md px-4 flex justify-end">
+      {/* ── 플로팅 컨트롤 컨테이너 (토스 스타일 토글 & FAB) ── */}
+      <div 
+        className={`fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-30 transition-opacity duration-300 ${
+          selectedPost ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <div className="w-full max-w-lg px-5 flex justify-between items-end gap-2">
+          
+          {/* 뷰 토글 */}
+          <div className="pointer-events-auto flex bg-white/95 backdrop-blur-md p-1.5 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.1)] border border-gray-100 relative">
+            {/* Sliding Background */}
+            <div 
+              className={`absolute top-1.5 w-[84px] h-[calc(100%-12px)] bg-gray-900 rounded-full transition-transform duration-300 ease-out shadow-sm ${
+                viewMode === 'map' ? 'translate-x-[84px]' : 'translate-x-0'
+              }`} 
+            />
+            
+            <button
+              onClick={() => { setViewMode('list'); setSelectedPost(null); }}
+              className={`relative z-10 flex items-center justify-center gap-1.5 w-[84px] py-2.5 rounded-full text-[13px] font-bold transition-colors duration-200 ${
+                viewMode === 'list' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <List className="w-4 h-4" />
+              리스트
+            </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`relative z-10 flex items-center justify-center gap-1.5 w-[84px] py-2.5 rounded-full text-[13px] font-bold transition-colors duration-200 ${
+                viewMode === 'map' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <MapIcon className="w-4 h-4" />
+              지도
+            </button>
+          </div>
+
+          {/* 기존 FAB 버튼 */}
           <Link href="/create" className="pointer-events-auto" onClick={handleCreateClick}>
-            <button className="flex items-center gap-2.5 px-6 h-14 rounded-full bg-[#006341] text-white font-bold text-base shadow-xl hover:bg-[#005235] active:scale-95 transition-all duration-150">
+            <button className="flex items-center justify-center gap-2 px-5 h-[48px] rounded-full bg-[#006341] text-white font-bold text-[13px] shadow-[0_4px_20px_rgba(0,99,65,0.4)] hover:bg-[#005235] active:scale-95 transition-all">
               <PlusCircle className="w-5 h-5 shrink-0" />
-              합승방 만들기
+              만들기
             </button>
           </Link>
         </div>
       </div>
+
+      {/* ── 바텀 시트 (마커 클릭 시) ── */}
+      {viewMode === 'map' && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className={`fixed inset-0 bg-black/30 z-40 backdrop-blur-sm transition-opacity duration-300 pointer-events-auto ${
+              selectedPost ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`} 
+            onClick={() => setSelectedPost(null)} 
+          />
+          {/* BottomSheet Content */}
+          <div 
+            className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] bg-gray-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-5 pb-10 ${
+              selectedPost ? 'translate-y-0' : 'translate-y-full'
+            }`}
+          >
+            {/* Grab Handle */}
+            <div className="flex justify-center mb-6 cursor-grab relative z-10 pt-2 pb-4 pointer-events-auto" onClick={() => setSelectedPost(null)}>
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+            </div>
+            {/* Scrollable Content (if needed) */}
+            <div className="relative z-20 pointer-events-auto max-h-[80vh] overflow-y-auto scrollbar-hide pb-10">
+              {selectedPost && (
+                <div className="animate-in slide-in-from-bottom-4 duration-300">
+                  <PostCard post={selectedPost} />
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   )
