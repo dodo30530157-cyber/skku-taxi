@@ -6,7 +6,9 @@ import { Search, PlusCircle, Map as MapIcon, List } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { Map as KakaoMap, MapMarker } from 'react-kakao-maps-sdk'
+import dynamic from 'next/dynamic'
+
+const KakaoMapViewer = dynamic(() => import('@/components/KakaoMapViewer'), { ssr: false, loading: () => <p>지도 로딩 중...</p> });
 
 const QUICK_CHIPS = [
   { label: '혜화역', icon: '🚉' },
@@ -31,10 +33,8 @@ export default function Home() {
   // 뷰 모드 및 지도 상태 추가
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [selectedPost, setSelectedPost] = useState<any>(null)
-  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
     // 세션 가져오기 및 구독
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -198,31 +198,11 @@ export default function Home() {
       ) : (
         /* ── 지도 뷰 ── */
         <div className="w-full h-[500px] md:h-[calc(100vh-250px)] rounded-3xl overflow-hidden shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-10">
-          {!isMounted ? null : !process.env.NEXT_PUBLIC_KAKAO_APP_KEY ? (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
-              <span className="text-4xl mb-3">⚠️</span>
-              <span className="text-red-500 font-bold text-sm">카카오맵 API 키가 설정되지 않았습니다.</span>
-              <span className="text-gray-400 text-xs mt-1">.env.local 파일에 NEXT_PUBLIC_KAKAO_APP_KEY를 등록해주세요.</span>
-            </div>
-          ) : (
-            <KakaoMap 
-              center={mapCenter} 
-              className="w-full h-full"
-              style={{ width: "100%", height: "100%" }} 
-              level={4}
-              onClick={() => setSelectedPost(null)}
-            >
-              {filteredPosts.map(post => (
-                post.lat && post.lng && (
-                  <MapMarker 
-                    key={post.id}
-                    position={{ lat: post.lat, lng: post.lng }}
-                    onClick={() => setSelectedPost(post)}
-                  />
-                )
-              ))}
-            </KakaoMap>
-          )}
+          <KakaoMapViewer 
+            filteredPosts={filteredPosts} 
+            mapCenter={mapCenter} 
+            setSelectedPost={setSelectedPost} 
+          />
         </div>
       )}
 

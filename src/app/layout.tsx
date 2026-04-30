@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
-import Script from 'next/script'
 import { AuthNav } from '@/components/AuthNav'
 import { SplashScreen } from '@/components/SplashScreen'
 
@@ -20,12 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <head>
-        <Script 
-          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_APP_KEY}&autoload=false`}
-          strategy="beforeInteractive"
-        />
-      </head>
+      <head />
       <body className={inter.className}>
         <SplashScreen />
         <div className="min-h-screen bg-gray-50 flex flex-col">
