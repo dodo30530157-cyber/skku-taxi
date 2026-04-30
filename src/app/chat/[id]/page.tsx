@@ -133,6 +133,14 @@ export default function ChatRoomPage() {
     }
   }
 
+  const handleKakaoT = () => {
+    window.location.href = 'kakaot://'
+    setTimeout(() => {
+      // 앱이 실행되지 않아 현재 창에 남아있을 경우 Fallback
+      window.open('https://t.kakao.com/', '_blank')
+    }, 1500)
+  }
+
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr)
     return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
@@ -226,6 +234,16 @@ export default function ChatRoomPage() {
           )}
         </div>
       )}
+
+      {/* 카카오T 딥링크 버튼 */}
+      <div className="shrink-0 mx-4 mt-3">
+        <button
+          onClick={handleKakaoT}
+          className="w-full flex items-center justify-center gap-1.5 py-3.5 rounded-2xl bg-[#FEE500] text-[#000000] font-bold text-sm shadow-[0_2px_10px_rgba(254,229,0,0.3)] hover:bg-[#FDD800] active:scale-95 transition-all"
+        >
+          <span className="text-base">🚕</span> 카카오T로 택시 부르기
+        </button>
+      </div>
 
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
