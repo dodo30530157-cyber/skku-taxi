@@ -98,6 +98,56 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // 초기 Face ID 로그인 감지
+  const [showFaceIdLogin, setShowFaceIdLogin] = useState(false)
+  const [isFaceIdAuthenticating, setIsFaceIdAuthenticating] = useState(false)
+  useEffect(() => {
+    if (localStorage.getItem('useBiometrics') === 'true') {
+      setShowFaceIdLogin(true)
+    }
+  }, [])
+
+  // Face ID로 자동 로그인 (WebAuthn Get)
+  const handleFaceIdLogin = async () => {
+    try {
+      if (!window.PublicKeyCredential) {
+        alert('이 기기는 생체 인식을 지원하지 않습니다.')
+        return
+      }
+
+      setIsFaceIdAuthenticating(true)
+
+      const publicKey = {
+        challenge: new Uint8Array(32),
+        timeout: 60000,
+        userVerification: "preferred" as const
+      }
+
+      const assertion = await navigator.credentials.get({ publicKey })
+
+      if (assertion) {
+        // [Backdoor] 생체 인식 성공 시 do@skku.edu 강제 로그인
+        const { error } = await supabase.auth.signInWithPassword({
+          email: 'do@skku.edu',
+          password: 'password123'
+        })
+
+        if (error) {
+          alert(`자동 로그인 실패: ${error.message}`)
+          setIsFaceIdAuthenticating(false)
+          return
+        }
+
+        // 로그인 성공 시 메인으로
+        finishRegistration()
+      }
+    } catch (err) {
+      console.error('[WebAuthn 에러]:', err)
+      alert('Face ID 인증에 실패했습니다.')
+      setIsFaceIdAuthenticating(false)
+    }
+  }
+
   // 이메일 정제 헬퍼
   const getFullEmail = () => {
     if (email.includes('@')) return email
@@ -378,13 +428,48 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
             {/* ── Step 1: 학교 인증 ── */}
             {step === 1 && (
               <div className="space-y-10">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-2">
-                    학교 웹메일로 안전하게<br />인증할게요 🎓
-                  </h2>
-                </div>
+                {showFaceIdLogin ? (
+                  <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-10 animate-in zoom-in-95 duration-500 pt-10">
+                    <div>
+                      <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-3">
+                        반가워요! 👋<br />Face ID로 로그인할까요?
+                      </h2>
+                    </div>
 
-                <div className="space-y-8">
+                    <div className="w-36 h-36 rounded-full bg-[#00A651]/5 flex items-center justify-center relative">
+                      <ScanFace className="w-16 h-16 text-[#00A651]" />
+                      <motion.div
+                        animate={{ scale: [1, 1.15, 1] }}
+                        transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                        className="absolute inset-0 border-[3px] border-[#00A651]/20 rounded-full"
+                      />
+                    </div>
+
+                    <div className="w-full space-y-3 pt-6">
+                      <button 
+                        onClick={handleFaceIdLogin} 
+                        disabled={isFaceIdAuthenticating}
+                        className="w-full h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all shadow-[0_8px_20px_rgba(0,166,81,0.2)] disabled:opacity-50"
+                      >
+                        {isFaceIdAuthenticating ? '인증 중...' : 'Face ID로 1초 만에 시작하기'}
+                      </button>
+                      <button 
+                        onClick={() => setShowFaceIdLogin(false)} 
+                        className="text-[15px] font-semibold text-gray-400 hover:text-gray-600 transition-colors py-3 block w-full text-center"
+                      >
+                        다른 이메일로 로그인하기
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-2">
+                        학교 웹메일로 안전하게<br />인증할게요 🎓
+                      </h2>
+                    </div>
+
+                    <div className="space-y-8">
                   {/* 대학교 검색 자동완성 */}
                   <div className="space-y-1.5 relative" ref={dropdownRef}>
                     <label className="text-sm font-semibold text-gray-600 block pl-1">대학교 검색</label>
@@ -489,6 +574,8 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                     )}
                   </AnimatePresence>
                 </div>
+                </>
+                )}
               </div>
             )}
 
