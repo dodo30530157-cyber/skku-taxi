@@ -8,6 +8,7 @@ import { MapPin, Clock, Users, ArrowRight, MessageCircle, Navigation, MessageSqu
 import { supabase } from '@/lib/supabase'
 import { MiniMap } from '@/components/MiniMap'
 import { useRouter } from 'next/navigation'
+import { useLanguage } from '@/providers/LanguageProvider'
 
 interface PostProps {
   id: string
@@ -28,6 +29,7 @@ interface PostProps {
 }
 
 export function PostCard({ post }: { post: PostProps }) {
+  const { t } = useLanguage()
   const [isJoined, setIsJoined] = useState(post.isJoined || false)
   const [currentPeople, setCurrentPeople] = useState(post.currentPeople)
   const [status, setStatus] = useState(post.status)
@@ -251,7 +253,7 @@ export function PostCard({ post }: { post: PostProps }) {
         {/* 시간 */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
           <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-          <span>{formatDate(post.departureTime)} 출발</span>
+          <span>{formatDate(post.departureTime)} {t('post.time.prefix')}</span>
         </div>
         
         {/* 미니맵 */}

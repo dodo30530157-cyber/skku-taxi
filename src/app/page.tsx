@@ -7,27 +7,33 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import dynamic from 'next/dynamic'
+import { useLanguage } from '@/providers/LanguageProvider'
 
-const KakaoMapViewer = dynamic(() => import('@/components/KakaoMapViewer'), { ssr: false, loading: () => <p>지도 로딩 중...</p> });
+function MapLoading() {
+  const { t } = useLanguage()
+  return <p>{t('main.map.loading')}</p>
+}
+
+const KakaoMapViewer = dynamic(() => import('@/components/KakaoMapViewer'), { ssr: false, loading: () => <MapLoading /> });
 
 const QUICK_CHIPS = [
-  { label: '혜화역', icon: '🚉' },
-  { label: '성대정문', icon: '🎓' },
-  { label: '서울역', icon: '🚆' },
-  { label: '율전캠', icon: '🌉' },
-  { label: '강남역', icon: '🏙️' },
-  { label: '사당역', icon: '🚇' },
-  { label: '수원역', icon: '🚊' },
+  { id: 'hyehwa', label: '혜화역', icon: '🚉' },
+  { id: 'skku', label: '성대정문', icon: '🎓' },
+  { id: 'seoul', label: '서울역', icon: '🚆' },
+  { id: 'yuljeon', label: '율전캠', icon: '🌉' },
+  { id: 'gangnam', label: '강남역', icon: '🏙️' },
+  { id: 'sadang', label: '사당역', icon: '🚇' },
+  { id: 'suwon', label: '수원역', icon: '🚊' },
 ]
 
-const CAMPUS_FILTERS = ['전체', '인사캠', '자과캠']
-
 export default function Home() {
+  const { t } = useLanguage()
+  const CAMPUS_FILTERS = [t('main.filter.all'), t('main.filter.hyehwa'), t('main.filter.suwon')]
   const router = useRouter()
   const [session, setSession] = useState<any>(null)
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [campusFilter, setCampusFilter] = useState('전체')
+  const [campusFilter, setCampusFilter] = useState(CAMPUS_FILTERS[0])
   const [searchQuery, setSearchQuery] = useState('')
   
   // 뷰 모드 및 지도 상태 추가
@@ -60,13 +66,15 @@ export default function Home() {
   const handleCreateClick = (e: React.MouseEvent) => {
     if (!session) {
       e.preventDefault()
-      alert('로그인 후 합승을 만들 수 있습니다. 로그인 페이지로 이동합니다.')
+      alert(t('main.alert.login_required'))
       router.push('/login')
     }
   }
 
   const filteredPosts = posts.filter(post => {
-    const matchesCampus = campusFilter === '전체' || post.campus === campusFilter
+    // 필터 로직: 언어가 바뀌면 campusFilter 값이 t('main.filter.all') 등으로 변함
+    const isAll = campusFilter === t('main.filter.all')
+    const matchesCampus = isAll || post.campus === (campusFilter === t('main.filter.hyehwa') ? '인사캠' : '자과캠')
     const q = searchQuery.toLowerCase()
     const matchesSearch =
       !q ||
@@ -86,10 +94,9 @@ export default function Home() {
       <div className="space-y-3 relative z-10">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-gray-900">
-            어디로 가시나요?{' '}
-            <span className="inline-block animate-bounce">🚕</span>
+            {t('main.hero.title')}
           </h1>
-          <p className="text-sm text-gray-400 mt-0.5">학우들과 함께 타고 택시비를 절약해요</p>
+          <p className="text-sm text-gray-400 mt-0.5">{t('main.hero.subtitle')}</p>
         </div>
 
         {/* Pill 검색창 */}
@@ -99,7 +106,7 @@ export default function Home() {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="출발지 또는 목적지 검색..."
+            placeholder={t('main.search.placeholder')}
             className="w-full h-13 pl-11 pr-5 rounded-full border border-gray-200 bg-white text-sm shadow-md shadow-gray-100 focus:outline-none focus:border-[#006341] focus:ring-2 focus:ring-[#006341]/15 transition-all placeholder:text-gray-400 font-medium"
             style={{ height: '52px' }}
           />
@@ -146,7 +153,7 @@ export default function Home() {
         </div>
         {!isLoading && (
           <span className="text-xs text-gray-400 font-medium shrink-0">
-            {filteredPosts.length}개
+            {t('main.count', { count: filteredPosts.length })}
           </span>
         )}
       </div>
@@ -178,14 +185,14 @@ export default function Home() {
                 <span className="text-5xl">🚕</span>
               </div>
               <p className="text-lg font-bold text-gray-800">
-                {searchQuery ? `"${searchQuery}" 검색 결과가 없어요` : '아직 등록된 합승이 없어요'}
+                {searchQuery ? t('main.empty.search_title', { query: searchQuery }) : t('main.empty.title')}
               </p>
               <p className="text-sm text-gray-400 mt-1 mb-7">
-                {searchQuery ? '다른 키워드로 검색해 보거나 새 합승을 만들어보세요!' : '첫 번째 방장이 되어보세요!'}
+                {searchQuery ? t('main.empty.search_desc') : t('main.empty.desc')}
               </p>
               <Link href="/create" onClick={handleCreateClick}>
                 <button className="px-7 py-3.5 bg-[#006341] text-white font-bold rounded-2xl shadow-md hover:bg-[#006341]/90 transition-all active:scale-95 text-sm">
-                  🚀 합승 만들기
+                  {t('main.btn.create')}
                 </button>
               </Link>
             </div>
@@ -230,7 +237,7 @@ export default function Home() {
               }`}
             >
               <List className="w-4 h-4" />
-              리스트
+              {t('main.toggle.list')}
             </button>
             <button
               onClick={() => setViewMode('map')}
@@ -239,7 +246,7 @@ export default function Home() {
               }`}
             >
               <MapIcon className="w-4 h-4" />
-              지도
+              {t('main.toggle.map')}
             </button>
           </div>
 
@@ -247,7 +254,7 @@ export default function Home() {
           <Link href="/create" className="pointer-events-auto" onClick={handleCreateClick}>
             <button className="flex items-center justify-center gap-2 px-5 h-[48px] rounded-full bg-[#006341] text-white font-bold text-[13px] shadow-[0_4px_20px_rgba(0,99,65,0.4)] hover:bg-[#005235] active:scale-95 transition-all">
               <PlusCircle className="w-5 h-5 shrink-0" />
-              만들기
+              {t('main.btn.create_fab')}
             </button>
           </Link>
         </div>

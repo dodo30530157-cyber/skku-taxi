@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useLanguage } from '@/providers/LanguageProvider'
 
 export function SplashScreen() {
+  const { t } = useLanguage()
   const [show, setShow] = useState(true)
   const [phase, setPhase] = useState<1 | 2 | 3>(1)
 
@@ -103,7 +105,7 @@ export function SplashScreen() {
           }`}
         >
           <h1 className="text-[52px] sm:text-6xl font-black text-white tracking-tighter drop-shadow-sm">
-            스꾸택시
+            {t('splash.title')}
           </h1>
         </div>
         
