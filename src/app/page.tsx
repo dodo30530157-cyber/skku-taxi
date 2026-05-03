@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import dynamic from 'next/dynamic'
 import { useLanguage } from '@/providers/LanguageProvider'
+import { RegisterFlow } from '@/components/RegisterFlow'
 
 function MapLoading() {
   const { t } = useLanguage()
@@ -40,13 +41,31 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [selectedPost, setSelectedPost] = useState<any>(null)
 
+  // 가입 여부 상태 추가
+  const [isRegistered, setIsRegistered] = useState<boolean | null>(null)
+
   useEffect(() => {
+    // 가입 여부 로컬 스토리지에서 확인
+    const registered = localStorage.getItem('isRegistered')
+    setIsRegistered(!!registered)
+
     // 세션 가져오기 및 구독
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+      if (session) {
+        setSession(session)
+      } else {
+        const mock = localStorage.getItem('mockSession')
+        if (mock) setSession(JSON.parse(mock))
+      }
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+      if (session) {
+        setSession(session)
+      } else {
+        const mock = localStorage.getItem('mockSession')
+        if (mock) setSession(JSON.parse(mock))
+        else setSession(null)
+      }
     })
     const fetchPosts = async () => {
       setIsLoading(true)
@@ -72,7 +91,6 @@ export default function Home() {
   }
 
   const filteredPosts = posts.filter(post => {
-    // 필터 로직: 언어가 바뀌면 campusFilter 값이 t('main.filter.all') 등으로 변함
     const isAll = campusFilter === t('main.filter.all')
     const matchesCampus = isAll || post.campus === (campusFilter === t('main.filter.hyehwa') ? '인사캠' : '자과캠')
     const q = searchQuery.toLowerCase()
@@ -87,9 +105,26 @@ export default function Home() {
   // 성균관대 명륜캠퍼스 중심 좌표
   const mapCenter = { lat: 37.5817849, lng: 126.9975608 }
 
+  // 로컬 스토리지를 확인하기 전엔 깜빡임 방지를 위해 빈 화면 렌더링
+  if (isRegistered === null) {
+    return null
+  }
+
+  // 가입하지 않은 경우 가입 플로우 노출
+  if (!isRegistered) {
+    return (
+      <RegisterFlow 
+        onComplete={() => {
+          setIsRegistered(true)
+          localStorage.setItem('isRegistered', 'true')
+        }} 
+      />
+    )
+  }
+
+  // 가입 완료된 경우 기존 메인 화면 렌더링
   return (
     <div className="animate-in fade-in pb-36 mt-2 space-y-4">
-
       {/* ── 검색 히어로 영역 ── */}
       <div className="space-y-3 relative z-10">
         <div>

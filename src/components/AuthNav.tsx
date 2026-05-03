@@ -15,12 +15,23 @@ export function AuthNav() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+      if (session) {
+        setSession(session)
+      } else {
+        const mock = localStorage.getItem('mockSession')
+        if (mock) setSession(JSON.parse(mock))
+      }
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+      if (session) {
+        setSession(session)
+      } else {
+        const mock = localStorage.getItem('mockSession')
+        if (mock) setSession(JSON.parse(mock))
+        else setSession(null)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -35,6 +46,9 @@ export function AuthNav() {
   }
 
   const handleLogout = async () => {
+    localStorage.removeItem('mockSession')
+    localStorage.removeItem('userProfile')
+    localStorage.removeItem('isRegistered')
     await supabase.auth.signOut()
     router.refresh()
   }
