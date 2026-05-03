@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Camera, ScanFace, Search } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 // 대학교 데이터 배열
 const universityList = [
@@ -71,12 +72,19 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
+  
+  // OTP Auth 상태
+  const [isOtpSent, setIsOtpSent] = useState(false)
+  const [isSendingOtp, setIsSendingOtp] = useState(false)
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false)
+  const [authError, setAuthError] = useState('')
 
-  // Step 3, 4: 폼 상태
+  // Step 2, 3: 폼 상태
   const [nickname, setNickname] = useState('')
   const [isDisabled, setIsDisabled] = useState(false)
   const [selectedBank, setSelectedBank] = useState(BANKS[0])
   const [accountNumber, setAccountNumber] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // 자동완성 외부 클릭 감지
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -90,32 +98,174 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleNext = () => {
-    if (step < 4) {
-      setDirection(1)
-      setStep(prev => prev + 1)
-    } else {
-      // 4단계 완료 시 더미(Mock) 유저 데이터 저장
-      const mockUser = {
-        id: 'mock-user-1234',
-        email: email || 'test@univ.edu',
-        isLoggedIn: true
-      }
-      const userProfile = {
-        nickname: nickname || '성대멋쟁이',
-        bank_name: selectedBank || '',
-        account_number: accountNumber || ''
-      }
-      
-      localStorage.setItem('mockSession', JSON.stringify({ user: mockUser }))
-      localStorage.setItem('userProfile', JSON.stringify(userProfile))
+  // 이메일 정제 헬퍼
+  const getFullEmail = () => {
+    if (email.includes('@')) return email
+    return `${email}${selectedUni?.domain}`
+  }
 
-      if (onComplete) {
-        onComplete()
-      } else {
-        alert('가입이 완료되었습니다!')
-      }
+  // OTP 발송
+  const handleSendOtp = async () => {
+    if (!selectedUni || !email) return
+    setIsSendingOtp(true)
+    setAuthError('')
+    
+    const fullEmail = getFullEmail()
+
+    // [Backdoor] 테스트 계정 감지: do@skku.edu 이면 API 호출 생략
+    if (fullEmail === 'do@skku.edu') {
+      setIsSendingOtp(false)
+      setIsOtpSent(true)
+      setAuthError('')
+      alert('인증번호가 전송되었습니다. 메일함을 확인해주세요.')
+      return
     }
+    
+    // 이메일 형식 검사 (테스트용으로 *@*.* 만 확인)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(fullEmail)) {
+      setAuthError('올바른 이메일 주소를 입력해주세요.')
+      setIsSendingOtp(false)
+      return
+    }
+    
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: fullEmail,
+        options: {
+          shouldCreateUser: true,
+        }
+      })
+
+      if (error) {
+        throw error
+      }
+
+      setIsOtpSent(true)
+      setAuthError('')
+      alert('인증번호가 전송되었습니다. 메일함을 확인해주세요.')
+    } catch (err: any) {
+      console.error('[OTP 발송 오류]:', err)
+      setAuthError(`인증 메일 발송 실패: ${err.message}`)
+      alert(`발송 에러: ${err.message}`)
+      setIsOtpSent(false)
+    } finally {
+      setIsSendingOtp(false)
+    }
+  }
+
+  // OTP 검증 및 다음 단계
+  const handleVerifyOtpAndNext = async () => {
+    if (!code || code.length < 6) {
+      setAuthError('6자리 인증번호를 입력해주세요.')
+      return
+    }
+
+    setIsVerifyingOtp(true)
+    setAuthError('')
+    
+    const fullEmail = getFullEmail()
+
+    // [Backdoor] 테스트 계정 및 특정 코드 감지 시 signInWithPassword 강제 호출
+    if (fullEmail === 'do@skku.edu' && code === '123456') {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'do@skku.edu',
+        password: 'password123'
+      })
+
+      setIsVerifyingOtp(false)
+
+      if (error) {
+        setAuthError(`강제 로그인 실패: ${error.message}`)
+        return
+      }
+
+      setDirection(1)
+      setStep(2) // 2단계 프로필로 이동
+      return
+    }
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: fullEmail,
+      token: code,
+      type: 'email'
+    })
+
+    setIsVerifyingOtp(false)
+    
+    if (error) {
+      setAuthError(`인증번호가 틀렸거나 만료되었습니다: ${error.message}`)
+      return
+    }
+
+    // 성공 시 Step 2(프로필)로
+    setDirection(1)
+    setStep(2)
+  }
+
+  // 하단 다음 버튼 핸들러
+  const handleNext = () => {
+    if (step === 1) {
+      handleVerifyOtpAndNext()
+      return
+    }
+
+    if (step === 2) {
+      // 프로필 -> 계좌로
+      if (!nickname.trim()) {
+        alert('닉네임을 입력해주세요.')
+        return
+      }
+      setDirection(1)
+      setStep(3)
+      return
+    }
+
+    if (step === 3) {
+      // 계좌 -> 프로필 저장 -> 생체 인식(Step 4)
+      handleCompleteRegister()
+      return
+    }
+  }
+
+  // 최종 회원가입(프로필 생성) 완료 및 다음(Step 4)으로 진행
+  const handleCompleteRegister = async () => {
+    setIsSubmitting(true)
+    
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session) {
+      alert('세션이 만료되었습니다. 다시 인증해주세요.')
+      setIsSubmitting(false)
+      setStep(1)
+      return
+    }
+
+    const profileData = {
+      id: session.user.id,
+      nickname: nickname.trim(),
+      bank_name: selectedBank || null,
+      account_number: accountNumber.replace(/[^0-9]/g, '') || null,
+    }
+
+    const { error: upsertError } = await supabase
+      .from('profiles')
+      .upsert([profileData])
+
+    setIsSubmitting(false)
+
+    if (upsertError) {
+      alert(`프로필 저장에 실패했습니다: ${upsertError.message}`)
+      return
+    }
+
+    localStorage.removeItem('mockSession')
+    localStorage.setItem('userProfile', JSON.stringify(profileData))
+    localStorage.setItem('isRegistered', 'true')
+
+    // 저장 완료 후 마지막 생체 인증(Step 4)로 유도
+    setDirection(1)
+    setStep(4)
   }
 
   const handlePrev = () => {
@@ -125,12 +275,71 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     }
   }
 
+  // 최종 앱 진입
+  const finishRegistration = () => {
+    if (onComplete) {
+      onComplete()
+    } else {
+      alert('가입이 완료되었습니다!')
+    }
+  }
+
+  // WebAuthn Face ID 등록
+  const handleRegisterFaceId = async () => {
+    try {
+      if (!window.PublicKeyCredential) {
+        alert('이 기기는 생체 인식을 지원하지 않습니다.')
+        finishRegistration()
+        return
+      }
+
+      // 더미 데이터로 WebAuthn 호출 (UX 테스트 목적)
+      const publicKey = {
+        challenge: new Uint8Array(32),
+        rp: { name: "SKKU Taxi" },
+        user: {
+          id: new Uint8Array(16),
+          name: email || "user@skku.edu",
+          displayName: nickname || "SKKU Taxi User"
+        },
+        pubKeyCredParams: [
+          { type: "public-key", alg: -7 },
+          { type: "public-key", alg: -257 }
+        ] as PublicKeyCredentialParameters[],
+        authenticatorSelection: {
+          userVerification: "preferred" as const
+        },
+        timeout: 60000,
+        attestation: "none" as const
+      }
+
+      const credential = await navigator.credentials.create({ publicKey })
+
+      if (credential) {
+        localStorage.setItem('useBiometrics', 'true')
+        alert('🎉 Face ID 등록이 완료되었습니다!')
+        finishRegistration()
+      }
+    } catch (err) {
+      console.error('[WebAuthn 에러]:', err)
+      alert('생체 인식 등록이 취소되었거나 실패했습니다.')
+      // 실패하더라도 메인으로 보냄
+      finishRegistration()
+    }
+  }
+
+  const handleSkipFaceId = () => {
+    finishRegistration()
+  }
+
   const filteredUniversities = universityList.filter(u => u.name.includes(searchQuery))
 
   const handleSelectUni = (uni: { name: string; domain: string }) => {
     setSelectedUni(uni)
     setSearchQuery(uni.name)
     setIsDropdownOpen(false)
+    setIsOtpSent(false)
+    setCode('')
   }
 
   const variants = {
@@ -189,6 +398,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                           setSearchQuery(e.target.value)
                           setIsDropdownOpen(true)
                           setSelectedUni(null) // 타이핑 시 선택 초기화
+                          setIsOtpSent(false)
                         }}
                         onFocus={() => setIsDropdownOpen(true)}
                         className="w-full h-14 pl-12 pr-4 rounded-2xl bg-[#F2F4F6] border-none text-gray-900 font-medium focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all"
@@ -230,80 +440,60 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
 
                   {/* 이메일 입력 */}
                   <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-600 block pl-1">학교 이메일</label>
+                    <label className="text-sm font-semibold text-gray-600 block pl-1">학교 이메일 <span className="font-normal opacity-60">(테스트 허용)</span></label>
                     <div className="flex gap-2">
                       <div className="relative flex-1 flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#00A651] transition-all overflow-hidden">
                         <input
-                          type="text"
-                          placeholder="아이디"
+                          type="email"
+                          placeholder="전체 이메일 (예: user@gmail.com)"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          disabled={!selectedUni}
-                          className="w-full bg-transparent outline-none font-medium text-gray-900 placeholder:text-gray-400 disabled:opacity-50 text-[16px]"
+                          onChange={(e) => {
+                            setEmail(e.target.value)
+                            setIsOtpSent(false)
+                          }}
+                          disabled={!selectedUni || isOtpSent}
+                          className="w-full bg-transparent outline-none font-medium text-gray-900 placeholder:text-gray-400 disabled:opacity-50 text-[15px]"
                         />
-                        <span className="text-gray-400 font-medium ml-1 whitespace-nowrap text-[15px]">
-                          {selectedUni ? selectedUni.domain : '@domain'}
-                        </span>
                       </div>
                       <button 
-                        disabled={!selectedUni || !email}
+                        onClick={handleSendOtp}
+                        disabled={!selectedUni || !email || isSendingOtp}
                         className="shrink-0 h-14 px-5 rounded-lg bg-gray-200 text-gray-700 font-bold text-[15px] hover:bg-gray-300 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        인증번호 발송
+                        {isSendingOtp ? '발송 중...' : (isOtpSent ? '재발송' : '인증번호 발송')}
                       </button>
                     </div>
                   </div>
 
                   {/* 인증번호 입력 */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-600 block pl-1">인증번호</label>
-                    <input
-                      type="text"
-                      placeholder="6자리 숫자 입력"
-                      maxLength={6}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all tracking-[0.2em] text-lg text-center"
-                    />
-                  </div>
+                  <AnimatePresence>
+                    {isOtpSent && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="space-y-1.5 overflow-hidden"
+                      >
+                        <label className="text-sm font-semibold text-gray-600 block pl-1">인증번호</label>
+                        <input
+                          type="text"
+                          placeholder="6자리 숫자 입력"
+                          maxLength={6}
+                          value={code}
+                          onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
+                          className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all tracking-[0.2em] text-lg text-center"
+                        />
+                        {authError && (
+                          <p className="text-red-500 text-sm font-medium pl-1 pt-1">{authError}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             )}
 
-            {/* ── Step 2: Face ID 등록 ── */}
+            {/* ── Step 2: 프로필 및 교통약자 (구 Step 3) ── */}
             {step === 2 && (
-              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-10 animate-in zoom-in-95 duration-500">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-3">
-                    다음부터는 1초 만에<br />로그인하세요 📱
-                  </h2>
-                  <p className="text-gray-500 font-medium text-[16px] leading-relaxed break-keep">
-                    비밀번호 없이 생체 인식으로<br />안전하고 빠르게 스꾸택시를 이용하세요.
-                  </p>
-                </div>
-
-                <div className="w-36 h-36 rounded-full bg-[#00A651]/5 flex items-center justify-center relative">
-                  <ScanFace className="w-16 h-16 text-[#00A651]" />
-                  <motion.div
-                    animate={{ scale: [1, 1.15, 1] }}
-                    transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                    className="absolute inset-0 border-[3px] border-[#00A651]/20 rounded-full"
-                  />
-                </div>
-
-                <div className="w-full space-y-3 pt-6">
-                  <button onClick={handleNext} className="w-full h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all">
-                    Face ID 등록하기
-                  </button>
-                  <button onClick={handleNext} className="text-[15px] font-semibold text-gray-400 hover:text-gray-600 transition-colors py-3 block w-full text-center">
-                    나중에 하기
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ── Step 3: 프로필 및 교통약자 ── */}
-            {step === 3 && (
               <div className="space-y-10">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-2">
@@ -343,7 +533,6 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                           휠체어 탑승 공간 등 승하차 시<br />배려가 필요한 경우 켜주세요.
                         </p>
                       </div>
-                      {/* Toggle Switch */}
                       <button
                         onClick={() => setIsDisabled(!isDisabled)}
                         className={`relative shrink-0 w-[52px] h-8 rounded-full transition-colors duration-300 ${
@@ -379,8 +568,8 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
               </div>
             )}
 
-            {/* ── Step 4: 정산 계좌 등록 ── */}
-            {step === 4 && (
+            {/* ── Step 3: 정산 계좌 등록 (구 Step 4) ── */}
+            {step === 3 && (
               <div className="space-y-10">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-3">
@@ -423,27 +612,68 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                 </div>
               </div>
             )}
+
+            {/* ── Step 4: Face ID 등록 (최종 단계) ── */}
+            {step === 4 && (
+              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-10 animate-in zoom-in-95 duration-500">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-3">
+                    Face ID로 1초 만에 로그인
+                  </h2>
+                  <p className="text-gray-500 font-medium text-[16px] leading-relaxed break-keep">
+                    다음부터는 비밀번호 없이 얼굴 인증으로<br />안전하고 빠르게 스꾸택시를 이용하세요.
+                  </p>
+                </div>
+
+                <div className="w-36 h-36 rounded-full bg-[#00A651]/5 flex items-center justify-center relative">
+                  <ScanFace className="w-16 h-16 text-[#00A651]" />
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1] }}
+                    transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                    className="absolute inset-0 border-[3px] border-[#00A651]/20 rounded-full"
+                  />
+                </div>
+
+                <div className="w-full space-y-3 pt-6">
+                  <button onClick={handleRegisterFaceId} className="w-full h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all shadow-[0_8px_20px_rgba(0,166,81,0.2)]">
+                    Face ID 등록하기
+                  </button>
+                  <button onClick={handleSkipFaceId} className="text-[15px] font-semibold text-gray-400 hover:text-gray-600 transition-colors py-3 block w-full text-center">
+                    나중에 하기
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* ── 하단 고정 버튼 영역 (Step 2는 자체 버튼 사용) ── */}
-      {step !== 2 && (
+      {/* ── 하단 고정 버튼 영역 (Step 4는 자체 버튼 사용) ── */}
+      {step !== 4 && (
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-30">
           <div className="max-w-md mx-auto pointer-events-auto flex items-center gap-3">
             {step > 1 && (
               <button
                 onClick={handlePrev}
                 className="h-14 px-5 rounded-xl bg-gray-200 text-gray-700 font-bold text-[17px] hover:bg-gray-300 active:scale-95 transition-all shrink-0"
+                disabled={isSubmitting}
               >
                 이전
               </button>
             )}
             <button
               onClick={handleNext}
-              className="flex-1 h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all"
+              disabled={
+                (step === 1 && (!isOtpSent || isVerifyingOtp)) ||
+                (step === 3 && isSubmitting)
+              }
+              className="flex-1 h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 flex justify-center items-center gap-2"
             >
-              {step === 4 ? '스꾸택시 시작하기' : '다음'}
+              {isVerifyingOtp || isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                '다음'
+              )}
             </button>
           </div>
         </div>
