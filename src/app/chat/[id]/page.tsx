@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeft, Send, Users, MapPin, Clock, Copy, Check } from 'lucide-react'
+import { useUserStore } from '@/lib/store'
+import { ArrowLeft, Send, Users, MapPin, Clock, Copy, Check, User } from 'lucide-react'
 
 interface Message {
   id: string
@@ -31,6 +32,7 @@ export default function ChatRoomPage() {
   const params = useParams()
   const router = useRouter()
   const postId = params.id as string
+  const profileImageUrl = useUserStore((state) => state.profileImageUrl)
 
   const [post, setPost] = useState<Post | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -280,25 +282,43 @@ export default function ChatRoomPage() {
         {messages.map((msg) => {
           const isMine = msg.nickname === nickname
           return (
-            <div key={msg.id} className={`flex items-end gap-2 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div key={msg.id} className={`flex w-full items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+              {/* 상대방 아바타 (왼쪽) */}
               {!isMine && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#006341] to-emerald-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-white text-xs font-bold shrink-0 self-end">
                   {msg.nickname.charAt(0)}
                 </div>
               )}
+
+              {/* 말풍선 영역 */}
               <div className={`flex flex-col gap-1 max-w-[72%] ${isMine ? 'items-end' : 'items-start'}`}>
                 {!isMine && (
                   <span className="text-xs text-gray-500 px-1">{msg.nickname}</span>
                 )}
-                <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   isMine
-                    ? 'bg-[#006341] text-white rounded-br-sm'
-                    : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-bl-sm'
+                    ? 'bg-[#00A651] text-white rounded-br-sm'
+                    : 'bg-[#F2F4F6] text-gray-800 rounded-bl-sm'
                 }`}>
                   {msg.content}
                 </div>
                 <span className="text-[10px] text-gray-400 px-1">{formatTime(msg.created_at)}</span>
               </div>
+
+              {/* 내 아바타 (오른쪽) */}
+              {isMine && (
+                profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt="나"
+                    className="w-8 h-8 rounded-full object-cover shrink-0 self-end shadow-sm"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-[#00A651] flex items-center justify-center shrink-0 self-end">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                )
+              )}
             </div>
           )
         })}

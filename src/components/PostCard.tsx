@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { MapPin, Clock, Users, ArrowRight, MessageCircle, Navigation, MessageSquare } from 'lucide-react'
+import { MapPin, Clock, Users, ArrowRight, MessageCircle, Navigation, MessageSquare, User } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { MiniMap } from '@/components/MiniMap'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/providers/LanguageProvider'
+import { useUserStore } from '@/lib/store'
 
 interface PostProps {
   id: string
@@ -30,6 +31,8 @@ interface PostProps {
 
 export function PostCard({ post }: { post: PostProps }) {
   const { t } = useLanguage()
+  const profileImageUrl = useUserStore((state) => state.profileImageUrl)
+  const myNickname = useUserStore((state) => state.nickname)
   const [isJoined, setIsJoined] = useState(post.isJoined || false)
   const [currentPeople, setCurrentPeople] = useState(post.currentPeople)
   const [status, setStatus] = useState(post.status)
@@ -366,15 +369,45 @@ export function PostCard({ post }: { post: PostProps }) {
       {/* 댓글 창 */}
       {isChatOpen && (
         <div className="border-t border-gray-100 bg-gray-50 p-4 rounded-b-2xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="max-h-[240px] overflow-y-auto flex flex-col gap-2.5 pr-2">
-            {comments.map((c, i) => (
-              <div key={i} className="flex flex-col">
-                <span className="text-[10px] text-gray-500 ml-1 mb-0.5">{c.nickname}</span>
-                <div className="bg-white px-3 py-2 rounded-2xl rounded-tl-sm w-fit text-[13px] text-gray-800 border border-gray-100 shadow-sm max-w-[85%] leading-snug break-all">
-                  {c.content}
+          <div className="max-h-[240px] overflow-y-auto flex flex-col gap-2.5 pr-1">
+            {comments.map((c, i) => {
+              const isMe = !!myNickname && c.nickname === myNickname
+              return (
+                <div key={i} className={`flex w-full items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  {/* 상대방 아바타 */}
+                  {!isMe && (
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-white text-[10px] font-bold shrink-0 self-end">
+                      {c.nickname?.charAt(0)}
+                    </div>
+                  )}
+
+                  {/* 말풍선 */}
+                  <div className={`flex flex-col max-w-[78%] ${isMe ? 'items-end' : 'items-start'}`}>
+                    {!isMe && (
+                      <span className="text-[10px] text-gray-500 ml-1 mb-0.5">{c.nickname}</span>
+                    )}
+                    <div className={`px-3 py-2 rounded-2xl text-[13px] leading-snug break-all ${
+                      isMe
+                        ? 'bg-[#00A651] text-white rounded-br-sm'
+                        : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                    }`}>
+                      {c.content}
+                    </div>
+                  </div>
+
+                  {/* 내 아바타 */}
+                  {isMe && (
+                    profileImageUrl ? (
+                      <img src={profileImageUrl} alt="나" className="w-7 h-7 rounded-full object-cover shrink-0 self-end" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-[#00A651] flex items-center justify-center shrink-0 self-end">
+                        <User className="w-3.5 h-3.5 text-white" />
+                      </div>
+                    )
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
             {comments.length === 0 && (
               <div className="text-center text-xs text-gray-400 py-6">첫 댓글을 남겨보세요!</div>
             )}

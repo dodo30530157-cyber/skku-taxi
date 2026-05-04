@@ -1,6 +1,7 @@
 'use client'
 
-import { Map as KakaoMap, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk'
+import { Map as KakaoMap, MapMarker, useKakaoLoader, CustomOverlayMap } from 'react-kakao-maps-sdk'
+import { useUserStore } from '@/lib/store'
 
 interface KakaoMapViewerProps {
   filteredPosts: any[]
@@ -9,6 +10,7 @@ interface KakaoMapViewerProps {
 }
 
 export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPost }: KakaoMapViewerProps) {
+  const profileImageUrl = useUserStore((state) => state.profileImageUrl)
   const [loading, error] = useKakaoLoader({
     appkey: process.env.NEXT_PUBLIC_KAKAO_APP_KEY || '',
   })
@@ -57,6 +59,23 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPo
           />
         )
       ))}
+
+      {/* 내 위치 (현재 지도 중심) 커스텀 마커 */}
+      <CustomOverlayMap position={mapCenter} zIndex={10}>
+        <div className="relative -translate-y-1/2 -translate-x-1/2 cursor-pointer transition-transform hover:scale-110 active:scale-95">
+          {profileImageUrl ? (
+            <img 
+              src={profileImageUrl} 
+              alt="My Location" 
+              className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+            />
+          ) : (
+            <div className="w-5 h-5 bg-blue-500 rounded-full border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+              <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-30" />
+            </div>
+          )}
+        </div>
+      </CustomOverlayMap>
     </KakaoMap>
   )
 }

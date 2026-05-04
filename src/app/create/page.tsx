@@ -7,9 +7,20 @@ import { MapPin, ChevronLeft, LocateFixed, Search } from 'lucide-react'
 import { Map, useKakaoLoader } from 'react-kakao-maps-sdk'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MapModal } from '@/components/MapModal'
+import { useUserStore } from '@/lib/store'
 
 export default function CreatePostPage() {
   const router = useRouter()
+  const profileImageUrl = useUserStore((state) => state.profileImageUrl)
+  
+  // 퀵 목적지 추천 데이터
+  const QUICK_DESTINATIONS = [
+    { id: 'suseon',  label: '🎓 수선관',       address: '서울특별시 종로구 성균관로 25-2 수선관',          lat: 37.5882, lng: 126.9936 },
+    { id: 'biz',     label: '💼 경영관',       address: '서울특별시 종로구 성균관로 25-2 경영관',          lat: 37.5876, lng: 126.9930 },
+    { id: '600th',   label: '🏛 600주년기념관', address: '서울특별시 종로구 성균관로 25-2 600주년기념관', lat: 37.5871, lng: 126.9924 },
+    { id: 'nsc',     label: '🔬 자과캠',       address: '경기도 수원시 장안구 서부로 2066 삼성학술정보관', lat: 37.2939, lng: 126.9749 },
+    { id: 'sadang',  label: '🚇 사당역',       address: '서울특별시 동작구 남부순환로 2089',              lat: 37.4765, lng: 126.9816 },
+  ]
   
   // 카카오맵 로더
   const [loading, error] = useKakaoLoader({
@@ -297,10 +308,9 @@ export default function CreatePostPage() {
     }
   }
 
-  const setQuickDestination = (name: string, lat: number, lng: number) => {
-    // 퀵 칩스는 수동으로 랜드마크 세팅
-    setDestAddress('서울특별시 종로구 성균관로 25-2') 
+  const setQuickDestination = (name: string, lat: number, lng: number, address: string) => {
     setDestLandmark(name)
+    setDestAddress(address)
     setDestLat(lat)
     setDestLng(lng)
   }
@@ -420,10 +430,29 @@ export default function CreatePostPage() {
               {/* 중앙 마커 (고정) */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-10 pointer-events-none pb-2">
                 <motion.div animate={{ y: isMapDragging ? -15 : 0 }} transition={{ type: 'spring', stiffness: 300 }} className="relative flex flex-col items-center">
-                  <div className="bg-gray-900 text-white text-[13px] font-bold px-3.5 py-1.5 rounded-full shadow-lg mb-1 whitespace-nowrap tracking-wide">
-                    출발
-                  </div>
-                  <MapPin className="w-9 h-9 text-gray-900 drop-shadow-md" fill="currentColor" />
+                  {profileImageUrl ? (
+                    <>
+                      {/* 말풍선 배지 */}
+                      <div className="bg-gray-900 text-white text-[13px] font-bold px-3.5 py-1.5 rounded-full shadow-lg mb-1.5 whitespace-nowrap tracking-wide">
+                        출발
+                      </div>
+                      {/* 연결선 */}
+                      <div className="w-0.5 h-2 bg-gray-900/50" />
+                      {/* 원형 프로필 사진 */}
+                      <img
+                        src={profileImageUrl}
+                        alt="내 위치"
+                        className="w-12 h-12 rounded-full object-cover border-[3px] border-white shadow-lg"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-gray-900 text-white text-[13px] font-bold px-3.5 py-1.5 rounded-full shadow-lg mb-1 whitespace-nowrap tracking-wide">
+                        출발
+                      </div>
+                      <MapPin className="w-9 h-9 text-gray-900 drop-shadow-md" fill="currentColor" />
+                    </>
+                  )}
                 </motion.div>
               </div>
 
@@ -483,11 +512,21 @@ export default function CreatePostPage() {
                 </div>
               </div>
 
-              {/* 퀵 칩스 */}
-              <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-6 px-6 pt-1">
-                <button onClick={() => setQuickDestination('인사캠(명륜)', 37.5882, 126.9936)} className="shrink-0 px-4 h-10 rounded-full bg-gray-50 border border-gray-100 text-gray-700 font-bold text-[14px] hover:bg-gray-100 transition-colors shadow-sm">🎓 인사캠</button>
-                <button onClick={() => setQuickDestination('자과캠(율전)', 37.2939, 126.9749)} className="shrink-0 px-4 h-10 rounded-full bg-gray-50 border border-gray-100 text-gray-700 font-bold text-[14px] hover:bg-gray-100 transition-colors shadow-sm">🔬 자과캠</button>
-                <button onClick={() => setQuickDestination('사당역', 37.4765, 126.9816)} className="shrink-0 px-4 h-10 rounded-full bg-gray-50 border border-gray-100 text-gray-700 font-bold text-[14px] hover:bg-gray-100 transition-colors shadow-sm">🚇 사당역</button>
+              {/* 퀵 칩스 - 가로 스크롤 */}
+              <div className="flex gap-2.5 overflow-x-auto scrollbar-hide -mx-6 px-6 pt-1 pb-1">
+                {QUICK_DESTINATIONS.map((dest) => (
+                  <button
+                    key={dest.id}
+                    onClick={() => setQuickDestination(dest.label, dest.lat, dest.lng, dest.address)}
+                    className={`shrink-0 px-4 h-10 rounded-full border font-bold text-[14px] transition-all shadow-sm ${
+                      destLandmark === dest.label
+                        ? 'bg-[#00A651] border-[#00A651] text-white shadow-[0_4px_12px_rgba(0,166,81,0.2)]'
+                        : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {dest.label}
+                  </button>
+                ))}
               </div>
 
               <button

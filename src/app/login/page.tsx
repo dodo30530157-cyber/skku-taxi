@@ -87,6 +87,27 @@ export default function LoginPage() {
             >
               {loading ? '로그인 중...' : '로그인'}
             </Button>
+            {/* 🚀 우리가 찾던 Face ID 깡패 버튼 */}
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const credential = await navigator.credentials.get({
+                    publicKey: {
+                      challenge: new Uint8Array(32),
+                      timeout: 60000,
+                      userVerification: "required"
+                    }
+                  });
+                  if (credential) alert("Face ID 인증 성공! (메인으로 이동합니다)");
+                } catch (error) {
+                  alert("Face ID 인증에 실패했습니다.");
+                }
+              }}
+              className="w-full h-11 mt-2 border-2 border-[#00A651] text-[#00A651] bg-white rounded-md font-semibold flex items-center justify-center gap-2 hover:bg-[#00A651]/5 transition-colors"
+            >
+              📱 Face ID로 로그인
+            </button>
             <div className="text-center text-sm text-gray-500 bg-gray-50 rounded-lg py-3">
               아직 계정이 없으신가요?
               <button

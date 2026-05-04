@@ -1,11 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
+import { useUserStore } from '@/lib/store'
+import { User, Camera } from 'lucide-react'
 
 export function ProfileModal() {
+  const profileImageUrl = useUserStore((state) => state.profileImageUrl)
+  const setProfileImageUrl = useUserStore((state) => state.setProfileImageUrl)
+  const profileImageInputRef = useRef<HTMLInputElement>(null)
+
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setProfileImageUrl(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
   const [isOpen, setIsOpen] = useState(false)
   const [nickname, setNickname] = useState('')
   const [bankName, setBankName] = useState('')
@@ -121,9 +136,20 @@ export function ProfileModal() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="text-gray-600 hover:text-[#00A651] transition-colors text-[15px] font-bold"
+        className="flex items-center gap-2 transition-all group"
       >
-        내 활동
+        {profileImageUrl ? (
+          <>
+            <img
+              src={profileImageUrl}
+              alt="내 프로필"
+              className="w-8 h-8 rounded-full object-cover border-2 border-white ring-1 ring-gray-200 shadow-sm group-hover:ring-[#00A651] transition-all"
+            />
+            <span className="text-[14px] font-bold text-gray-600 group-hover:text-[#00A651] transition-colors">내 활동</span>
+          </>
+        ) : (
+          <span className="text-gray-600 hover:text-[#00A651] transition-colors text-[15px] font-bold">내 활동</span>
+        )}
       </button>
 
       {isOpen && (
@@ -176,13 +202,35 @@ export function ProfileModal() {
                 
                 {/* 1. 상단 활동 요약 (Achievement Dashboard) */}
                 <div className="bg-white rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-50">
-                  <div className="flex items-center gap-3 mb-6 px-1">
-                    <div className="w-12 h-12 bg-gradient-to-tr from-[#00A651] to-emerald-300 rounded-full flex items-center justify-center shadow-inner">
-                      <span className="text-2xl">😎</span>
+                  <div className="flex items-center gap-4 mb-6 px-1">
+                    {/* 프로필 이미지 + 편집 뱃지 */}
+                    <div
+                      className="relative cursor-pointer group"
+                      onClick={() => profileImageInputRef.current?.click()}
+                    >
+                      {profileImageUrl ? (
+                        <img src={profileImageUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white ring-1 ring-gray-100" />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center shadow-inner border border-gray-100">
+                          <User className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
+                      {/* 카메라 뱃지 */}
+                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00A651] rounded-full flex items-center justify-center border-2 border-white shadow-sm group-hover:bg-[#008f46] transition-colors">
+                        <Camera className="w-3 h-3 text-white" />
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={profileImageInputRef}
+                        onChange={handleProfileImageChange}
+                      />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">{nickname || '스꾸러'}님</h3>
                       <p className="text-xs font-semibold text-gray-500">지구를 지키는 그린 라이더</p>
+                      <p className="text-[11px] text-[#00A651] font-medium mt-0.5">사진을 눌러 변경하기</p>
                     </div>
                   </div>
 
