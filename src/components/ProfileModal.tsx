@@ -381,8 +381,8 @@ export function ProfileModal() {
 
               </div>
               
-              {/* 3. 하단 저장 버튼 */}
-              <div className="mt-8">
+              {/* 3. 하단 버튼 영역 */}
+              <div className="mt-8 space-y-4">
                 <button
                   type="button"
                   className="w-full h-16 bg-[#00A651] hover:bg-[#008f46] active:scale-[0.98] transition-all text-white font-bold text-[18px] rounded-2xl shadow-[0_8px_24px_rgba(0,166,81,0.3)] flex items-center justify-center"
@@ -394,6 +394,49 @@ export function ProfileModal() {
                   ) : (
                     '내 정보 저장하기'
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const confirmed = window.confirm("정말 스꾸택시를 탈퇴하시겠습니까?\n모든 탑승 기록과 정보가 영구적으로 삭제됩니다.");
+                    if (!confirmed || !session) return;
+
+                    setLoading(true);
+                    try {
+                      // 1. Storage 사진 삭제 (파일명 추출)
+                      if (profileImageUrl) {
+                        const fileName = profileImageUrl.split('/').pop();
+                        if (fileName) {
+                          await supabase.storage.from('avatars').remove([fileName]);
+                        }
+                      }
+
+                      // 2. DB 프로필 삭제
+                      const { error: dbError } = await supabase
+                        .from('profiles')
+                        .delete()
+                        .eq('id', session.user.id);
+
+                      if (dbError) throw dbError;
+
+                      // 3. 로그아웃 및 상태 초기화
+                      const clearUser = useUserStore.getState().clearUser;
+                      clearUser();
+                      await supabase.auth.signOut();
+                      
+                      alert("그동안 스꾸택시를 이용해주셔서 감사합니다. 탈퇴가 완료되었습니다.");
+                      router.push('/login');
+                      router.refresh();
+                    } catch (err: any) {
+                      alert(`탈퇴 처리 중 오류 발생: ${err.message || JSON.stringify(err)}`);
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="w-full py-3 text-[13px] font-bold text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  회원 탈퇴하기
                 </button>
               </div>
 
