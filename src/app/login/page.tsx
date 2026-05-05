@@ -22,13 +22,43 @@ export default function LoginPage() {
       return
     }
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data: { session }, error } = await supabase.auth.signInWithPassword({ email, password })
+    
     if (error) {
       alert(`로그인에 실패했습니다: ${error.message}`)
       setLoading(false)
       return
     }
-    router.push('/')
+
+    if (session) {
+      // 가입된 프로필이 있는지 확인
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+
+      if (!profileError && profile) {
+        // 기존 유저: 프로필 정보가 있으면 가입 완료 처리
+        localStorage.setItem('isRegistered', 'true')
+        localStorage.setItem('userProfile', JSON.stringify({
+          id: profile.id,
+          nickname: profile.nickname,
+          bank_name: profile.bank_name,
+          account_number: profile.account_number
+        }))
+        if (profile.avatar_url) {
+          localStorage.setItem('profileImageUrl', profile.avatar_url)
+        }
+        router.push('/')
+      } else {
+        // 신규 유저 또는 프로필 미완성 유저: 온보딩 유도
+        localStorage.setItem('isRegistered', 'false')
+        router.push('/')
+      }
+    } else {
+      router.push('/')
+    }
   }
 
   const handleGoToRegister = () => {
@@ -139,7 +169,29 @@ export default function LoginPage() {
                         userVerification: "required"
                       }
                     });
-                    if (credential) alert("Face ID 인증 성공! (메인으로 이동합니다)");
+                    if (credential) {
+                      // Face ID 성공 후 세션 확인 및 프로필 동기화
+                      const { data: { session } } = await supabase.auth.getSession()
+                      if (session) {
+                        const { data: profile } = await supabase
+                          .from('profiles')
+                          .select('*')
+                          .eq('id', session.user.id)
+                          .single()
+                        
+                        if (profile) {
+                          localStorage.setItem('isRegistered', 'true')
+                          localStorage.setItem('userProfile', JSON.stringify({
+                            id: profile.id,
+                            nickname: profile.nickname,
+                            bank_name: profile.bank_name,
+                            account_number: profile.account_number
+                          }))
+                        }
+                      }
+                      alert("Face ID 인증 성공! (메인으로 이동합니다)");
+                      router.push('/')
+                    }
                   } catch (error) {
                     alert("등록된 Face ID가 없거나 인증에 실패했습니다.");
                   }

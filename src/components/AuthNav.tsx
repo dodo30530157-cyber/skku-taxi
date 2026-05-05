@@ -7,8 +7,10 @@ import { supabase } from '@/lib/supabase'
 import { ProfileModal } from '@/components/ProfileModal'
 import { NotificationBell } from '@/components/NotificationBell'
 import { LogOut, LogIn, PlusCircle, UserCircle2 } from 'lucide-react'
+import { useUserStore } from '@/lib/store'
 
 export function AuthNav() {
+  const clearUser = useUserStore((state) => state.clearUser)
   const [session, setSession] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
@@ -46,11 +48,17 @@ export function AuthNav() {
   }
 
   const handleLogout = async () => {
-    localStorage.removeItem('mockSession')
-    localStorage.removeItem('userProfile')
-    localStorage.removeItem('isRegistered')
+    // 1. 전역 상태 및 로컬 스토리지 초기화
+    clearUser()
+    
+    // 2. Supabase 로그아웃
     await supabase.auth.signOut()
+    
+    // 3. 리다이렉트 및 리프레시
+    router.push('/')
     router.refresh()
+    
+    alert('로그아웃되었습니다.')
   }
 
   if (loading) return <div className="w-20 h-8" />
@@ -60,10 +68,12 @@ export function AuthNav() {
       {/* 알림 벨 — 로그인 시만 */}
       {session && <NotificationBell session={session} />}
 
-      {/* 프로필 아이콘 버튼 — ProfileModal 트리거 */}
-      <div className="relative flex items-center">
-        <ProfileModal />
-      </div>
+      {/* 프로필 아이콘 버튼 — ProfileModal 트리거 (로그인 시만) */}
+      {session && (
+        <div className="relative flex items-center">
+          <ProfileModal />
+        </div>
+      )}
 
       {/* 로그인/로그아웃 */}
       {session ? (

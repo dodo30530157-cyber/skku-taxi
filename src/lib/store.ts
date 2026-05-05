@@ -5,6 +5,7 @@ interface UserStore {
   setProfileImageUrl: (url: string | null) => void
   nickname: string | null
   setNickname: (nickname: string | null) => void
+  clearUser: () => void
 }
 
 export const useUserStore = create<UserStore>((set) => ({
@@ -25,5 +26,14 @@ export const useUserStore = create<UserStore>((set) => ({
   })() : null,
   setNickname: (nickname) => {
     set({ nickname })
+  },
+  clearUser: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('profileImageUrl')
+      localStorage.removeItem('userProfile')
+      localStorage.removeItem('isRegistered')
+      localStorage.removeItem('mockSession')
+    }
+    set({ profileImageUrl: null, nickname: null })
   },
 }))

@@ -50,9 +50,32 @@ export default function Home() {
     setIsRegistered(!!registered)
 
     // 세션 가져오기 및 구독
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
         setSession(session)
+        
+        // 가입 여부 재확인 (새 기기 로그인 등 대응)
+        if (localStorage.getItem('isRegistered') !== 'true') {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+            
+          if (profile) {
+            localStorage.setItem('isRegistered', 'true')
+            localStorage.setItem('userProfile', JSON.stringify({
+              id: profile.id,
+              nickname: profile.nickname,
+              bank_name: profile.bank_name,
+              account_number: profile.account_number
+            }))
+            if (profile.avatar_url) {
+              localStorage.setItem('profileImageUrl', profile.avatar_url)
+            }
+            setIsRegistered(true)
+          }
+        }
       } else {
         const mock = localStorage.getItem('mockSession')
         if (mock) setSession(JSON.parse(mock))
