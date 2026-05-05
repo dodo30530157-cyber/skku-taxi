@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST='{"app/page.tsx -> @/components/KakaoMapViewer":{"id":3690,"files":["static/chunks/690.c373ae3b721d580e.js"]}}';
+self.__REACT_LOADABLE_MANIFEST="{\"app/page.tsx -> @/components/KakaoMapViewer\":{\"id\":\"app/page.tsx -> @/components/KakaoMapViewer\",\"files\":[\"static/chunks/_app-pages-browser_src_components_KakaoMapViewer_tsx.js\"]}}"

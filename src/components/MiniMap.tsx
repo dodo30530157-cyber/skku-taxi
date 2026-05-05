@@ -55,6 +55,8 @@ export function MiniMap({ lat, lng, showProfilePin = false }: MiniMapProps) {
                 <img
                   src={profileImageUrl!}
                   alt="내 위치"
+                  referrerPolicy="no-referrer"
+                  crossOrigin="anonymous"
                   className="w-9 h-9 rounded-full object-cover border-[2px] border-white shadow-lg"
                 />
               </div>

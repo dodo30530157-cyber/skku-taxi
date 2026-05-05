@@ -1,8 +1,8 @@
 {
   "app/page.tsx -> @/components/KakaoMapViewer": {
-    "id": 3690,
+    "id": "app/page.tsx -> @/components/KakaoMapViewer",
     "files": [
-      "static/chunks/690.c373ae3b721d580e.js"
+      "static/chunks/_app-pages-browser_src_components_KakaoMapViewer_tsx.js"
     ]
   }
 }

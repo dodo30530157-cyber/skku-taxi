@@ -12,14 +12,92 @@ export function ProfileModal() {
   const setProfileImageUrl = useUserStore((state) => state.setProfileImageUrl)
   const profileImageInputRef = useRef<HTMLInputElement>(null)
 
-  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setProfileImageUrl(reader.result as string)
+  const compressImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('이미지 압축 실패'));
+          }, 'image/jpeg', 0.8);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0]
+      if (!file || !session) return
+
+      // 환경 변수 체크 (디버깅용)
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        alert('환경 변수가 누락되었습니다. (URL/ANON_KEY)')
+      }
+
+      // 이미지 압축
+      const compressedBlob = await compressImage(file)
+      const uploadFile = new File([compressedBlob], file.name, { type: 'image/jpeg' })
+
+      // 파일명: userId_timestamp.ext
+      const ext = file.name.split('.').pop()
+      const fileName = `${session.user.id}_${Date.now()}.${ext}`
+
+      // Supabase Storage에 업로드
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, uploadFile, { upsert: true })
+
+      if (uploadError) {
+        alert(`이미지 업로드 실패 상세: ${JSON.stringify(uploadError)}`)
+        return
+      }
+
+      // public URL 생성
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName)
+
+      // 전역 상태 업데이트
+      setProfileImageUrl(publicUrl)
+
+      // profiles 테이블에도 저장
+      const { error: upsertError } = await supabase.from('profiles').upsert([{ id: session.user.id, avatar_url: publicUrl }])
+      if (upsertError) {
+        alert(`프로필 DB 갱신 실패 상세: ${JSON.stringify(upsertError)}`)
+      }
+    } catch (err: any) {
+      alert(`사진 처리 중 예외 발생: ${JSON.stringify(err)}`)
     }
-    reader.readAsDataURL(file)
   }
   const [isOpen, setIsOpen] = useState(false)
   const [nickname, setNickname] = useState('')
