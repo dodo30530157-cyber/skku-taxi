@@ -220,61 +220,77 @@ export default function CreatePostPage() {
     if (type === 'departure') {
       setDepLat(lat)
       setDepLng(lng)
-      setDepLandmark('주소를 분석 중입니다...')
+      setDepLandmark('주소를 분석 중...')
       setDepAddress('')
     }
-    
-    if (!window.kakao?.maps?.services) return
 
-    const geocoder = new window.kakao.maps.services.Geocoder()
-    geocoder.coord2Address(lng, lat, async (result: any, status: any) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        const road = result[0].road_address
-        const addr = result[0].address
-        const fullAddress = road ? road.address_name : addr.address_name
+    // kakao.maps.services가 로드될 때까지 최대 3초간 폴링
+    const tryGeocode = (retries = 15) => {
+      if (!window.kakao?.maps?.services) {
+        if (retries <= 0) {
+          // 타임아웃: fallback 처리
+          if (type === 'departure') {
+            setDepLandmark('현위치')
+            setDepAddress('주소를 불러올 수 없습니다')
+          } else {
+            setDestLandmark('목적지')
+            setDestAddress('주소를 불러올 수 없습니다')
+          }
+          return
+        }
+        setTimeout(() => tryGeocode(retries - 1), 200)
+        return
+      }
 
-        // 정밀 랜드마크 스캔
-        const preciseResult = await fetchPreciseLandmark(lat, lng, fullAddress)
-        
-        let finalLandmark = ''
-        let finalDetailAddress = fullAddress
+      const geocoder = new window.kakao.maps.services.Geocoder()
+      geocoder.coord2Address(lng, lat, async (result: any, status: any) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          const road = result[0].road_address
+          const addr = result[0].address
+          const fullAddress = road ? road.address_name : addr.address_name
 
-        if (preciseResult) {
-          finalLandmark = preciseResult.landmark
-          finalDetailAddress = preciseResult.detailAddress
-        } else {
-          // API에서 정밀 추출 실패 시: 카카오 지오코더의 건물명 사용
-          if (road && road.building_name) {
-            // 캠퍼스 등 포괄적 명칭 필터링
-            if (!road.building_name.endsWith('캠퍼스') && !road.building_name.endsWith('대학교') && road.building_name !== '성균관대') {
-              finalLandmark = road.building_name
+          // 정밀 랜드마크 스캔
+          const preciseResult = await fetchPreciseLandmark(lat, lng, fullAddress)
+          
+          let finalLandmark = ''
+          let finalDetailAddress = fullAddress
+
+          if (preciseResult) {
+            finalLandmark = preciseResult.landmark
+            finalDetailAddress = preciseResult.detailAddress
+          } else {
+            if (road && road.building_name) {
+              if (!road.building_name.endsWith('캠퍼스') && !road.building_name.endsWith('대학교') && road.building_name !== '성균관대') {
+                finalLandmark = road.building_name
+              }
+            }
+            if (!finalLandmark) {
+              finalLandmark = road?.road_name ? `${road.road_name} 주변` : (addr.region_3depth_name || '어딘가')
+              finalDetailAddress = fullAddress
             }
           }
-          
-          if (!finalLandmark) {
-            // 끝까지 없으면 도로명이나 동 이름 사용
-            finalLandmark = road?.road_name ? `${road.road_name} 주변` : (addr.region_3depth_name || '어딘가')
-            finalDetailAddress = fullAddress
+
+          if (type === 'departure') {
+            setDepLandmark(finalLandmark)
+            setDepAddress(finalDetailAddress)
+          } else {
+            setDestLandmark(finalLandmark)
+            setDestAddress(finalDetailAddress)
+          }
+        } else {
+          // 지오코더 결과 없음 → fallback
+          if (type === 'departure') {
+            setDepAddress('상세 주소 없음')
+            setDepLandmark('현위치 (알 수 없음)')
+          } else {
+            setDestLandmark('목적지')
+            setDestAddress('상세 주소 없음')
           }
         }
+      })
+    }
 
-        if (type === 'departure') {
-          setDepLandmark(finalLandmark)
-          setDepAddress(finalDetailAddress)
-        } else {
-          setDestLandmark(finalLandmark)
-          setDestAddress(finalDetailAddress)
-        }
-      } else {
-        if (type === 'departure') {
-          setDepAddress('상세 주소 없음')
-          setDepLandmark('현위치 (알 수 없음)')
-        } else {
-          setDestLandmark('목적지')
-          setDestAddress('상세 주소 없음')
-        }
-      }
-    })
+    tryGeocode()
   }
 
   // 출발지/목적지가 변경될 때마다 자동 제목 갱신
