@@ -340,13 +340,30 @@ export default function CreatePostPage() {
       return
     }
 
-    const savedProfile = localStorage.getItem('userProfile')
-    if (!savedProfile) {
-      alert('내 프로필을 먼저 설정해 주세요!')
+    setIsSubmitting(true)
+
+    // 세션 확인
+    const { data: { session } } = await supabase.auth.getSession()
+    let userId = session?.user?.id
+    if (!userId) {
+      const mock = localStorage.getItem('mockSession')
+      if (mock) userId = JSON.parse(mock).user?.id
+    }
+    if (!userId) {
+      alert('로그인이 필요합니다.')
+      setIsSubmitting(false)
+      router.push('/login')
       return
     }
 
-    setIsSubmitting(true)
+    // 방장 프로필 이미지 가져오기
+    let avatarUrl: string | null = null
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('avatar_url, nickname')
+      .eq('id', userId)
+      .single()
+    avatarUrl = profile?.avatar_url ?? null
 
     const finalBankName = useMyAccount ? bankName : ''
     const finalAccountNumber = useMyAccount ? accountNumber : ''
@@ -354,8 +371,10 @@ export default function CreatePostPage() {
     const newPost = {
       campus,
       title,
-      departure: depAddress,
-      destination: destAddress,
+      departure: depAddress || depLandmark,
+      destination: destAddress || destLandmark,
+      lat: depLat,
+      lng: depLng,
       dep_lat: depLat,
       dep_lng: depLng,
       dest_lat: destLat,
@@ -368,17 +387,31 @@ export default function CreatePostPage() {
       note: note || null,
       bank_name: finalBankName || null,
       account_number: finalAccountNumber.replace(/-/g, '') || null,
-      user_id: 'mock-user-1234'
+      user_id: userId,
+      avatar_url: avatarUrl,
     }
 
-    const dummyId = Math.floor(Math.random() * 100000).toString()
+    const { data: inserted, error: insertError } = await supabase
+      .from('posts')
+      .insert([newPost])
+      .select()
+      .single()
+
     setIsSubmitting(false)
-    
+
+    if (insertError) {
+      alert(`합승 방 생성에 실패했습니다.\n상세: ${insertError.message}`)
+      return
+    }
+
+    // 내 방 목록 로컬 저장 (선택)
     const myPosts = JSON.parse(localStorage.getItem('myPosts') || '[]')
-    myPosts.push(dummyId)
+    myPosts.push(inserted.id)
     localStorage.setItem('myPosts', JSON.stringify(myPosts))
 
-    router.push(`/chat/${dummyId}`)
+    // 메인 화면 캐시 무효화 및 이동
+    router.refresh()
+    router.push('/')
   }
 
   const hasAccount = !!(bankName && accountNumber)
