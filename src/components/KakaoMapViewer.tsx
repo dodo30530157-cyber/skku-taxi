@@ -1,6 +1,6 @@
 'use client'
 
-import { Map as KakaoMap, MapMarker, useKakaoLoader, CustomOverlayMap } from 'react-kakao-maps-sdk'
+import { Map as KakaoMap, useKakaoLoader, CustomOverlayMap } from 'react-kakao-maps-sdk'
 import { useUserStore } from '@/lib/store'
 
 interface KakaoMapViewerProps {
@@ -50,27 +50,56 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPo
       level={4}
       onClick={() => setSelectedPost(null)}
     >
-      {filteredPosts.map(post => (
-        post.lat && post.lng && (
-          <MapMarker 
+      {/* 합승 팟 마커 — 방장 프로필 사진 원형 핀 */}
+      {filteredPosts.map(post =>
+        post.lat && post.lng ? (
+          <CustomOverlayMap
             key={post.id}
             position={{ lat: post.lat, lng: post.lng }}
-            onClick={() => setSelectedPost(post)}
-          />
-        )
-      ))}
+            zIndex={5}
+          >
+            <div
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedPost(post)
+              }}
+              className="relative -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+              style={{ pointerEvents: 'auto' }}
+            >
+              {/* 바깥 링 */}
+              <div className="absolute inset-0 rounded-full bg-[#00A651] scale-110 opacity-20 group-hover:opacity-40 transition-opacity" />
+              {post.avatar_url ? (
+                <img
+                  src={post.avatar_url}
+                  alt={post.title || '합승 팟'}
+                  referrerPolicy="no-referrer"
+                  className="w-11 h-11 rounded-full object-cover border-[3px] border-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform"
+                />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-[#00A651] border-[3px] border-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-white font-bold text-xs">🚕</span>
+                </div>
+              )}
+              {/* 출발지 말풍선 라벨 */}
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap shadow-sm opacity-80">
+                {post.departure?.slice(0, 6) || '출발지'}
+              </div>
+            </div>
+          </CustomOverlayMap>
+        ) : null
+      )}
 
-      {/* 내 위치 (현재 지도 중심) 커스텀 마커 */}
+      {/* 내 위치 — 현재 지도 중심 */}
       <CustomOverlayMap position={mapCenter} zIndex={10}>
-        <div className="relative -translate-y-1/2 -translate-x-1/2 cursor-pointer transition-transform hover:scale-110 active:scale-95">
+        <div className="relative -translate-y-1/2 -translate-x-1/2">
           {profileImageUrl ? (
             <img 
               src={profileImageUrl} 
               alt="My Location" 
-              className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+              className="w-10 h-10 rounded-full object-cover border-2 border-[#00A651] shadow-[0_4px_12px_rgba(0,166,81,0.25)]"
             />
           ) : (
-            <div className="w-5 h-5 bg-blue-500 rounded-full border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
+            <div className="w-5 h-5 bg-blue-500 rounded-full border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.2)] relative">
               <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-30" />
             </div>
           )}

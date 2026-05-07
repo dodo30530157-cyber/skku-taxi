@@ -262,7 +262,7 @@ export default function Home() {
         </div>
       ) : (
         /* ── 지도 뷰 ── */
-        <div className="w-full h-[500px] md:h-[calc(100vh-250px)] rounded-3xl overflow-hidden shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-10">
+        <div className="w-full h-[500px] md:h-[calc(100vh-250px)] rounded-3xl shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-0" style={{ isolation: 'isolate' }}>
           <KakaoMapViewer 
             filteredPosts={filteredPosts} 
             mapCenter={mapCenter} 
