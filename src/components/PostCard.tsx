@@ -25,8 +25,16 @@ interface PostProps {
   user_id?: string
   dep_lat?: number
   dep_lng?: number
-  gender_condition?: string // 'ANY' | 'SAME'
+  lat?: number
+  lng?: number
+  avatar_url?: string
+  note?: string
+  gender_condition?: string
   campus?: string
+  profiles?: {
+    avatar_url?: string | null
+    nickname?: string | null
+  } | null
 }
 
 export function PostCard({ post }: { post: PostProps }) {

@@ -47,7 +47,7 @@ export default function Home() {
   useEffect(() => {
     // 가입 여부 로컬 스토리지에서 확인
     const registered = localStorage.getItem('isRegistered')
-    setIsRegistered(!!registered)
+    setIsRegistered(registered === 'true')
 
     // 세션 가져오기 및 구독
     supabase.auth.getSession().then(async ({ data: { session } }) => {
