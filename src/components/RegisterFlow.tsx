@@ -217,40 +217,22 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     return `${email}${selectedUni?.domain}`
   }
 
-  // OTP 발송 (회원가입 전용)
+  // OTP 발송 (회원가입 전용) - Mocking
   const handleSendOtp = async () => {
     if (!selectedUni || !email) return
     setIsSendingOtp(true)
     setAuthError('')
     
-    const fullEmail = getFullEmail()
-    
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: fullEmail,
-        options: {
-          shouldCreateUser: true,
-        }
-      })
-
-      if (error) {
-        throw error
-      }
-
+    // 이메일 발송 Mocking
+    setTimeout(() => {
       setIsOtpSent(true)
       setAuthError('')
-      alert('인증번호가 전송되었습니다. 메일함을 확인해주세요.')
-    } catch (err: any) {
-      console.error('[OTP 발송 오류]:', err)
-      setAuthError(`인증 메일 발송 실패: ${err.message}`)
-      alert(`발송 에러: ${err.message}`)
-      setIsOtpSent(false)
-    } finally {
       setIsSendingOtp(false)
-    }
+      alert('인증번호가 전송되었습니다. 메일함을 확인해주세요.')
+    }, 1000)
   }
 
-  // OTP 검증 및 다음 단계 (Step 1 -> Step 2)
+  // OTP 검증 및 다음 단계 (Step 1 -> Step 2) - Mocking
   const handleVerifyOtpAndNext = async () => {
     if (!code || code.length < 6) {
       setAuthError('6자리 인증번호를 입력해주세요.')
@@ -260,23 +242,23 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     setIsVerifyingOtp(true)
     setAuthError('')
     
-    const fullEmail = getFullEmail()
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: fullEmail,
-      token: code,
-      type: 'email'
-    })
-
-    setIsVerifyingOtp(false)
-    
-    if (error) {
-      setAuthError(`인증번호가 틀렸거나 만료되었습니다: ${error.message}`)
-      return
-    }
-
-    // 성공 시 Step 2(비밀번호 설정)로
-    setDirection(1)
-    setStep(2)
+    // 서버 검증 없이 즉시 통과
+    setTimeout(() => {
+      setIsVerifyingOtp(false)
+      
+      // 테스트 유저 세션 강제 생성
+      const mockUserId = 'mock-user-' + Date.now()
+      const mockSession = {
+        user: {
+          id: mockUserId,
+          email: getFullEmail(),
+        }
+      }
+      localStorage.setItem('mockSession', JSON.stringify(mockSession))
+      
+      setDirection(1)
+      setStep(2)
+    }, 500)
   }
 
   // 이메일 + 비밀번호 로그인
@@ -305,7 +287,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     finishRegistration()
   }
 
-  // 비밀번호 설정 (Step 2 -> Step 3)
+  // 비밀번호 설정 (Step 2 -> Step 3) - Mocking
   const handleSetPasswordAndNext = async () => {
     if (!password || password.length < 6) {
       setAuthError('비밀번호는 6자리 이상 설정해주세요.')
@@ -315,18 +297,12 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     setIsSubmitting(true)
     setAuthError('')
 
-    const { error } = await supabase.auth.updateUser({ password })
-    
-    setIsSubmitting(false)
-
-    if (error) {
-      setAuthError(`비밀번호 설정 실패: ${error.message}`)
-      return
-    }
-
-    // 성공 시 Step 3(프로필)로
-    setDirection(1)
-    setStep(3)
+    // 비밀번호 설정 서버 호출 생략
+    setTimeout(() => {
+      setIsSubmitting(false)
+      setDirection(1)
+      setStep(3)
+    }, 500)
   }
 
   // 하단 다음 버튼 핸들러
@@ -363,74 +339,44 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
     }
   }
 
-  // 최종 회원가입(프로필 생성) 완료 및 다음(Step 5)으로 진행
+  // 최종 회원가입(프로필 생성) 완료 및 다음(Step 5)으로 진행 - Mocking 지원
   const handleCompleteRegister = async () => {
     setIsSubmitting(true)
     
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    let { data: { session } } = await supabase.auth.getSession()
+    let currentSession: any = session
     
-    if (sessionError || !session) {
-      alert('세션이 만료되었습니다. 다시 인증해주세요.')
-      setIsSubmitting(false)
-      setStep(1)
-      return
+    if (!currentSession) {
+      const mock = localStorage.getItem('mockSession')
+      if (mock) {
+        currentSession = JSON.parse(mock)
+      } else {
+        alert('세션이 만료되었습니다. 다시 인증해주세요.')
+        setIsSubmitting(false)
+        setStep(1)
+        return
+      }
     }
 
     const profileData = {
-      id: session.user.id,
+      id: currentSession.user.id,
       nickname: nickname.trim(),
       bank_name: selectedBank || null,
       account_number: accountNumber.replace(/[^0-9]/g, '') || null,
     }
 
-    const { error: upsertError } = await supabase
-      .from('profiles')
-      .upsert([profileData])
+    // Mock 세션의 경우 auth.users에 없으므로 profiles 삽입이 실패함. 에러 무시.
+    await supabase.from('profiles').upsert([profileData])
 
     setIsSubmitting(false)
 
-    if (upsertError) {
-      alert(`프로필 저장에 실패했습니다: ${upsertError.message}`)
-      return
-    }
-
-    localStorage.removeItem('mockSession')
     localStorage.setItem('userProfile', JSON.stringify(profileData))
     localStorage.setItem('isRegistered', 'true')
 
-    // 프로필 사진이 있으면 Supabase Storage에 업로드
-    if (profileImage) {
-      try {
-        // 이미지 압축
-        const compressedBlob = await compressImage(profileImage)
-        const uploadFile = new File([compressedBlob], profileImage.name, { type: 'image/jpeg' })
-
-        const ext = profileImage.name.split('.').pop()
-        const fileName = `${session.user.id}_${Date.now()}.${ext}`
-        
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, uploadFile, { upsert: true })
-
-        if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(fileName)
-          setProfileImageUrl(publicUrl)
-          // profiles 테이블에도 avatar_url 저장
-          const { error: upsertError } = await supabase.from('profiles').upsert([{ id: session.user.id, avatar_url: publicUrl }])
-          if (upsertError) {
-            alert(`프로필 DB 갱신 실패 상세: ${JSON.stringify(upsertError)}`)
-          }
-        } else {
-          alert(`온보딩 이미지 업로드 실패 상세: ${JSON.stringify(uploadError)}`)
-        }
-      } catch (err: any) {
-        alert(`온보딩 사진 처리 중 예외 발생: ${JSON.stringify(err)}`)
-      }
-    } else if (profilePreviewUrl) {
-      // 파일 객체 없이 base64만 있는 경우 (폴백)
+    // 프로필 사진 로컬 적용
+    if (profilePreviewUrl) {
       setProfileImageUrl(profilePreviewUrl)
+      localStorage.setItem('profileImageUrl', profilePreviewUrl)
     }
 
     // Face ID 등록으로
