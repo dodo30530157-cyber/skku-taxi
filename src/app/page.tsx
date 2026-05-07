@@ -94,7 +94,7 @@ export default function Home() {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('posts')
-        .select('*')
+        .select('*, profiles(avatar_url, nickname)')
         .order('id', { ascending: false })
       if (error) console.error('Error fetching posts:', error)
       else setPosts(data || [])

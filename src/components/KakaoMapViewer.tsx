@@ -68,9 +68,9 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPo
             >
               {/* 바깥 링 */}
               <div className="absolute inset-0 rounded-full bg-[#00A651] scale-110 opacity-20 group-hover:opacity-40 transition-opacity" />
-              {post.avatar_url ? (
+              {post.profiles?.avatar_url ? (
                 <img
-                  src={post.avatar_url}
+                  src={post.profiles.avatar_url}
                   alt={post.title || '합승 팟'}
                   referrerPolicy="no-referrer"
                   className="w-11 h-11 rounded-full object-cover border-[3px] border-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform"

@@ -356,14 +356,7 @@ export default function CreatePostPage() {
       return
     }
 
-    // 방장 프로필 이미지 가져오기
-    let avatarUrl: string | null = null
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('avatar_url, nickname')
-      .eq('id', userId)
-      .single()
-    avatarUrl = profile?.avatar_url ?? null
+    // 방장 프로필 이미지는 posts에 저장하지 않음 — profiles JOIN으로 조회
 
     const finalBankName = useMyAccount ? bankName : ''
     const finalAccountNumber = useMyAccount ? accountNumber : ''
@@ -388,7 +381,6 @@ export default function CreatePostPage() {
       bank_name: finalBankName || null,
       account_number: finalAccountNumber.replace(/-/g, '') || null,
       user_id: userId,
-      avatar_url: avatarUrl,
     }
 
     const { data: inserted, error: insertError } = await supabase
