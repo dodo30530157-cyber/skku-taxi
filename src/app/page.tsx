@@ -262,7 +262,7 @@ export default function Home() {
         </div>
       ) : (
         /* ── 지도 뷰 ── */
-        <div className="w-full h-[500px] md:h-[calc(100vh-250px)] rounded-3xl shadow-sm border border-gray-200 relative animate-in fade-in zoom-in-95 duration-200 z-0" style={{ isolation: 'isolate' }}>
+        <div className="w-full h-[500px] md:h-[calc(100vh-250px)] rounded-3xl animate-in fade-in zoom-in-95 duration-200" style={{ position: 'relative' }}>
           <KakaoMapViewer 
             filteredPosts={filteredPosts} 
             mapCenter={mapCenter} 
@@ -272,10 +272,10 @@ export default function Home() {
       )}
 
       {/* ── 플로팅 컨트롤 컨테이너 (토스 스타일 토글 & FAB) ── */}
+      {/* pointer-events-none은 컨테이너에만, 실제 버튼들은 pointer-events-auto */}
       <div 
-        className={`fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-30 transition-opacity duration-300 ${
-          selectedPost ? 'opacity-0' : 'opacity-100'
-        }`}
+        className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none z-[60]"
+        style={{ opacity: selectedPost ? 0 : 1, transition: 'opacity 0.3s' }}
       >
         <div className="w-full max-w-lg px-5 flex justify-between items-end gap-2">
           
@@ -308,7 +308,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* 기존 FAB 버튼 */}
+          {/* FAB 버튼 */}
           <Link href="/create" className="pointer-events-auto" onClick={handleCreateClick}>
             <button className="flex items-center justify-center gap-2 px-5 h-[48px] rounded-full bg-[#006341] text-white font-bold text-[13px] shadow-[0_4px_20px_rgba(0,99,65,0.4)] hover:bg-[#005235] active:scale-95 transition-all">
               <PlusCircle className="w-5 h-5 shrink-0" />
@@ -318,33 +318,25 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── 바텀 시트 (마커 클릭 시) ── */}
-      {viewMode === 'map' && (
+      {/* ── 바텀 시트 (마커 클릭 시) — Backdrop은 selectedPost 있을 때만 렌더링 ── */}
+      {viewMode === 'map' && selectedPost && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — 항상 존재하지 않고 selectedPost일 때만 마운트하여 터치 블로킹 방지 */}
           <div 
-            className={`fixed inset-0 bg-black/30 z-40 backdrop-blur-sm transition-opacity duration-300 pointer-events-auto ${
-              selectedPost ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`} 
+            className="fixed inset-0 bg-black/30 z-[70] backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setSelectedPost(null)} 
           />
           {/* BottomSheet Content */}
           <div 
-            className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] bg-gray-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-5 pb-10 ${
-              selectedPost ? 'translate-y-0' : 'translate-y-full'
-            }`}
+            className="fixed inset-x-0 bottom-0 z-[80] bg-gray-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-5 pb-10 animate-in slide-in-from-bottom duration-300 ease-out"
           >
             {/* Grab Handle */}
-            <div className="flex justify-center mb-6 cursor-grab relative z-10 pt-2 pb-4 pointer-events-auto" onClick={() => setSelectedPost(null)}>
+            <div className="flex justify-center cursor-grab pt-2 pb-4" onClick={() => setSelectedPost(null)}>
               <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
             </div>
-            {/* Scrollable Content (if needed) */}
-            <div className="relative z-20 pointer-events-auto max-h-[80vh] overflow-y-auto scrollbar-hide pb-10">
-              {selectedPost && (
-                <div className="animate-in slide-in-from-bottom-4 duration-300">
-                  <PostCard post={selectedPost} />
-                </div>
-              )}
+            {/* Scrollable Content */}
+            <div className="max-h-[75vh] overflow-y-auto scrollbar-hide pb-10">
+              <PostCard post={selectedPost} />
             </div>
           </div>
         </>
