@@ -95,10 +95,15 @@ export default function Home() {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('posts')
-        .select('*, profiles(avatar_url, nickname)')
+        .select('*')
         .order('id', { ascending: false })
-      if (error) console.error('Error fetching posts:', error)
-      else setPosts(data || [])
+      
+      if (error) {
+        console.error('Error fetching posts:', error)
+      } else {
+        console.log("불러온 방 목록(조인 제거):", data)
+        setPosts(data || [])
+      }
       setIsLoading(false)
     }
     fetchPosts()
@@ -126,6 +131,10 @@ export default function Home() {
   }
 
   const filteredPosts = posts.filter(post => {
+    // [DEBUG] 필터링 임시 무력화: DB에 있는 모든 posts를 무조건 화면에 띄움
+    return true
+    
+    /* 기존 필터링 로직 주석 처리
     const isAll = campusFilter === t('main.filter.all')
     const matchesCampus = isAll || post.campus === (campusFilter === t('main.filter.hyehwa') ? '인사캠' : '자과캠')
     const q = searchQuery.toLowerCase()
@@ -135,6 +144,7 @@ export default function Home() {
       post.destination?.toLowerCase().includes(q) ||
       post.title?.toLowerCase().includes(q)
     return matchesCampus && matchesSearch
+    */
   })
 
   // 성균관대 명륜캠퍼스 중심 좌표
