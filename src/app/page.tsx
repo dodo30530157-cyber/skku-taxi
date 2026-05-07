@@ -1,5 +1,6 @@
 'use client'
 
+
 import { useEffect, useState } from 'react'
 import { PostCard } from '@/components/PostCard'
 import { Search, PlusCircle, Map as MapIcon, List } from 'lucide-react'
@@ -102,7 +103,18 @@ export default function Home() {
     }
     fetchPosts()
 
-    return () => subscription.unsubscribe()
+    // posts 테이블 실시간 변경 감지 (방 생성 즉시 렌더링)
+    const postsSubscription = supabase
+      .channel('public:posts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+        fetchPosts()
+      })
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+      supabase.removeChannel(postsSubscription)
+    }
   }, [])
 
   const handleCreateClick = (e: React.MouseEvent) => {
