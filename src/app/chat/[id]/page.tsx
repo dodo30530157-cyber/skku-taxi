@@ -104,14 +104,30 @@ export default function ChatRoomPage() {
 
   const handleSend = async () => {
     if (!input.trim() || sending) return
+    const content = input.trim()
     setSending(true)
-    await supabase.from('comments').insert([{
+    
+    const { data, error } = await supabase.from('comments').insert([{
       post_id: postId,
       nickname,
-      content: input.trim(),
-    }])
-    setInput('')
+      content,
+    }]).select('*').single()
+    
     setSending(false)
+
+    if (error) {
+      console.error('메시지 전송 에러:', error)
+      alert('메시지 전송 실패: ' + error.message)
+    } else {
+      setInput('')
+      if (data) {
+        // 즉시 화면 업데이트 (Realtime보다 빠르게 반영, 중복 방지)
+        setMessages(prev => {
+          if (prev.some(m => m.id === data.id)) return prev
+          return [...prev, data as Message]
+        })
+      }
+    }
   }
 
   const handleCopyAccount = async () => {

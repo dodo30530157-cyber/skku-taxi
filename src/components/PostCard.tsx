@@ -37,7 +37,7 @@ interface PostProps {
   } | null
 }
 
-export function PostCard({ post }: { post: PostProps }) {
+export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideMiniMap?: boolean }) {
   const { t } = useLanguage()
   const profileImageUrl = useUserStore((state) => state.profileImageUrl)
   const myNickname = useUserStore((state) => state.nickname)
@@ -95,21 +95,32 @@ export function PostCard({ post }: { post: PostProps }) {
   const handleCommentSubmit = async () => {
     if (!nicknameInput.trim() || !commentInput.trim()) return
 
+    const content = commentInput.trim()
     setIsCommentLoading(true)
-    const { error } = await supabase.from('comments').insert([
+    
+    const { data, error } = await supabase.from('comments').insert([
       {
         post_id: post.id,
         nickname: nicknameInput.trim(),
-        content: commentInput.trim()
+        content
       }
-    ])
+    ]).select('*').single()
+    
     setIsCommentLoading(false)
 
     if (error) {
-      alert('댓글 게시에 실패했습니다.')
-      console.error(error)
+      console.error('메시지 전송 에러:', error)
+      alert('메시지 전송 실패: ' + error.message)
     } else {
       setCommentInput('')
+      
+      if (data) {
+        // 즉시 화면 업데이트 (Realtime보다 빠르게 반영, 중복 방지)
+        setComments(prev => {
+          if (prev.some(c => c.id === data.id)) return prev
+          return [...prev, data]
+        })
+      }
 
       // 알림 생성 (댓글 작성자가 방장이 아닐 때 방장에게 알림)
       if (post.user_id && !isAuthor) {
@@ -133,7 +144,11 @@ export function PostCard({ post }: { post: PostProps }) {
     }
   }, [post.id])
 
+  // 만료 여부 (출발 시간이 과거인지)
+  const isExpired = post.departureTime ? new Date(post.departureTime).getTime() < Date.now() : false
+
   const isFull = currentPeople >= post.maxPeople || status === '완료' || status === '모집완료'
+  const isClosed = isFull || isExpired
   const isEarlyDeparted = status === '모집완료' && currentPeople < post.maxPeople
 
   const handleJoin = async () => {
@@ -247,9 +262,9 @@ export function PostCard({ post }: { post: PostProps }) {
             <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{post.title}</h3>
           </div>
           <span className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${
-            status === '모집중' && !isFull ? 'bg-[#006341]/10 text-[#006341]' : 'bg-gray-100 text-gray-500'
+            status === '모집중' && !isClosed ? 'bg-[#006341]/10 text-[#006341]' : 'bg-gray-100 text-gray-500'
           }`}>
-            {isFull ? '마감' : status}
+            {isExpired ? '시간 만료' : isFull ? '마감' : status}
           </span>
         </div>
 
@@ -267,8 +282,8 @@ export function PostCard({ post }: { post: PostProps }) {
           <span>{formatDate(post.departureTime)} {t('post.time.prefix')}</span>
         </div>
         
-        {/* 미니맵 */}
-        {post.dep_lat && post.dep_lng && (
+        {/* 미니맵 (지도 모달 등에서는 숨김 처리) */}
+        {post.dep_lat && post.dep_lng && !hideMiniMap && (
           <MiniMap lat={post.dep_lat} lng={post.dep_lng} />
         )}
 
@@ -297,9 +312,9 @@ export function PostCard({ post }: { post: PostProps }) {
           </div>
         </div>
 
-        {!isAuthor && isFull && (
+        {!isAuthor && isClosed && (
           <div className="bg-blue-50 text-blue-700 p-2.5 rounded-xl text-xs font-medium border border-blue-100 text-center">
-            모집이 마감되었습니다. 방장이 택시를 호출합니다! 🚕
+            {isExpired ? '출발 시간이 지나 마감된 합승입니다. ⏳' : '모집이 마감되었습니다. 방장이 택시를 호출합니다! 🚕'}
           </div>
         )}
       </div>
@@ -350,12 +365,12 @@ export function PostCard({ post }: { post: PostProps }) {
             ) : (
               <Button
                 className={`w-full font-semibold rounded-xl ${
-                  isFull ? 'bg-gray-100 text-gray-400 hover:bg-gray-100 cursor-not-allowed' : 'bg-[#006341] hover:bg-[#006341]/90 text-white'
+                  isClosed ? 'bg-gray-100 text-gray-400 hover:bg-gray-100 cursor-not-allowed' : 'bg-[#006341] hover:bg-[#006341]/90 text-white'
                 }`}
                 onClick={handleJoin}
-                disabled={isFull || isLoading}
+                disabled={isClosed || isLoading}
               >
-                {isLoading ? '처리 중...' : isFull ? '모집이 마감되었습니다' : '합승 참여하기'}
+                {isLoading ? '처리 중...' : isExpired ? '마감된 합승입니다' : isFull ? '모집이 마감되었습니다' : '합승 참여하기'}
               </Button>
             )}
           </div>

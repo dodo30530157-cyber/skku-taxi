@@ -1,19 +1,31 @@
 'use client'
 
-import { Map as KakaoMap, useKakaoLoader, CustomOverlayMap } from 'react-kakao-maps-sdk'
+import { useState, useEffect } from 'react'
+
+import { Map as KakaoMap, useKakaoLoader, CustomOverlayMap, Polyline } from 'react-kakao-maps-sdk'
 import { useUserStore } from '@/lib/store'
 
 interface KakaoMapViewerProps {
   filteredPosts: any[]
   mapCenter: { lat: number; lng: number }
+  selectedPost?: any | null
   setSelectedPost: (post: any) => void
 }
 
-export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPost }: KakaoMapViewerProps) {
+export default function KakaoMapViewer({ filteredPosts, mapCenter, selectedPost, setSelectedPost }: KakaoMapViewerProps) {
   const profileImageUrl = useUserStore((state) => state.profileImageUrl)
+  const [center, setCenter] = useState(mapCenter)
+  
   const [loading, error] = useKakaoLoader({
     appkey: process.env.NEXT_PUBLIC_KAKAO_APP_KEY || '',
   })
+
+  // 선택된 방이 변경되면 부드럽게 중심 좌표 이동 (panTo 효과)
+  useEffect(() => {
+    if (selectedPost && selectedPost.dep_lat && selectedPost.dep_lng) {
+      setCenter({ lat: Number(selectedPost.dep_lat), lng: Number(selectedPost.dep_lng) })
+    }
+  }, [selectedPost])
 
   if (!process.env.NEXT_PUBLIC_KAKAO_APP_KEY) {
     return (
@@ -44,7 +56,8 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPo
 
   return (
     <KakaoMap 
-      center={mapCenter} 
+      center={center}
+      isPanto={true} 
       className="w-full h-full"
       style={{ width: "100%", height: "100%" }} 
       level={4}
@@ -87,6 +100,38 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, setSelectedPo
             </div>
           </CustomOverlayMap>
         ) : null
+      )}
+
+      {/* 선택된 팟의 출발지-도착지 연결선 (거미줄 방지) */}
+      {selectedPost?.dep_lat && selectedPost?.dep_lng && selectedPost?.dest_lat && selectedPost?.dest_lng && (
+        (() => {
+          const pathArray = [
+            { lat: Number(selectedPost.dep_lat), lng: Number(selectedPost.dep_lng) },
+            { lat: Number(selectedPost.dest_lat), lng: Number(selectedPost.dest_lng) }
+          ]
+          console.log("선 긋기 좌표:", pathArray)
+
+          return (
+            <>
+              <Polyline
+                path={pathArray}
+                strokeWeight={4}
+                strokeColor={"#00A651"}
+                strokeOpacity={0.8}
+                strokeStyle={"shortdash"}
+              />
+              {/* 도착지 마커 핀 */}
+              <CustomOverlayMap position={pathArray[1]} zIndex={4}>
+                <div className="absolute -translate-x-1/2 -translate-y-full pb-1">
+                  <div className="bg-[#00A651] text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md whitespace-nowrap">
+                    🚩 도착지
+                  </div>
+                  <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-[#00A651] absolute -bottom-1 left-1/2 -translate-x-1/2" />
+                </div>
+              </CustomOverlayMap>
+            </>
+          )
+        })()
       )}
 
       {/* 내 위치 — 현재 지도 중심 */}

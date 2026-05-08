@@ -96,12 +96,13 @@ export default function Home() {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
-        .order('id', { ascending: false })
+        .order('created_at', { ascending: false })
       
       if (error) {
         console.error('Error fetching posts:', error)
       } else {
-        console.log("불러온 방 목록(조인 제거):", data)
+        console.log("현재 DB에서 가져온 총 방 개수:", data?.length)
+        console.log("방 목록 원본:", data)
         setPosts(data || [])
       }
       setIsLoading(false)
@@ -288,6 +289,7 @@ export default function Home() {
           <KakaoMapViewer 
             filteredPosts={filteredPosts} 
             mapCenter={mapCenter} 
+            selectedPost={selectedPost}
             setSelectedPost={setSelectedPost} 
           />
         </div>
@@ -358,7 +360,7 @@ export default function Home() {
             </div>
             {/* Scrollable Content */}
             <div className="max-h-[75vh] overflow-y-auto scrollbar-hide pb-10">
-              <PostCard post={selectedPost} />
+              <PostCard post={selectedPost} hideMiniMap={true} />
             </div>
           </div>
         </>
