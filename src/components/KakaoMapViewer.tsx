@@ -23,7 +23,9 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, selectedPost,
   // 선택된 방이 변경되면 부드럽게 중심 좌표 이동 (panTo 효과)
   useEffect(() => {
     if (selectedPost && selectedPost.dep_lat && selectedPost.dep_lng) {
-      setCenter({ lat: Number(selectedPost.dep_lat), lng: Number(selectedPost.dep_lng) })
+      const depLat = Number(selectedPost.dep_lat)
+      const depLng = Number(selectedPost.dep_lng)
+      setCenter({ lat: depLat, lng: depLng })
     }
   }, [selectedPost])
 
@@ -64,11 +66,17 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, selectedPost,
       onClick={() => setSelectedPost(null)}
     >
       {/* 합승 팟 마커 — 방장 프로필 사진 원형 핀 */}
-      {filteredPosts.map(post =>
-        post.lat && post.lng ? (
+      {filteredPosts.map(post => {
+        const lat = Number(post.dep_lat)
+        const lng = Number(post.dep_lng)
+
+        // 좌표가 없거나 NaN일 경우 렌더링 건너뜀 (에러 방지)
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null
+
+        return (
           <CustomOverlayMap
             key={post.id}
-            position={{ lat: post.lat, lng: post.lng }}
+            position={{ lat, lng }}
             zIndex={5}
           >
             <div
@@ -99,40 +107,8 @@ export default function KakaoMapViewer({ filteredPosts, mapCenter, selectedPost,
               </div>
             </div>
           </CustomOverlayMap>
-        ) : null
-      )}
-
-      {/* 선택된 팟의 출발지-도착지 연결선 (거미줄 방지) */}
-      {selectedPost?.dep_lat && selectedPost?.dep_lng && selectedPost?.dest_lat && selectedPost?.dest_lng && (
-        (() => {
-          const pathArray = [
-            { lat: Number(selectedPost.dep_lat), lng: Number(selectedPost.dep_lng) },
-            { lat: Number(selectedPost.dest_lat), lng: Number(selectedPost.dest_lng) }
-          ]
-          console.log("선 긋기 좌표:", pathArray)
-
-          return (
-            <>
-              <Polyline
-                path={pathArray}
-                strokeWeight={4}
-                strokeColor={"#00A651"}
-                strokeOpacity={0.8}
-                strokeStyle={"shortdash"}
-              />
-              {/* 도착지 마커 핀 */}
-              <CustomOverlayMap position={pathArray[1]} zIndex={4}>
-                <div className="absolute -translate-x-1/2 -translate-y-full pb-1">
-                  <div className="bg-[#00A651] text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md whitespace-nowrap">
-                    🚩 도착지
-                  </div>
-                  <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-[#00A651] absolute -bottom-1 left-1/2 -translate-x-1/2" />
-                </div>
-              </CustomOverlayMap>
-            </>
-          )
-        })()
-      )}
+        )
+      })}
 
       {/* 내 위치 — 현재 지도 중심 */}
       <CustomOverlayMap position={mapCenter} zIndex={10}>

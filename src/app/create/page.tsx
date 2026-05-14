@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { MapPin, ChevronLeft, LocateFixed, Search } from 'lucide-react'
 import { Map, useKakaoLoader } from 'react-kakao-maps-sdk'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -222,6 +223,11 @@ export default function CreatePostPage() {
       setDepLng(lng)
       setDepLandmark('주소를 분석 중...')
       setDepAddress('')
+    } else {
+      setDestLat(lat)
+      setDestLng(lng)
+      setDestLandmark('주소를 분석 중...')
+      setDestAddress('')
     }
 
     // kakao.maps.services가 로드될 때까지 최대 3초간 폴링
@@ -351,8 +357,18 @@ export default function CreatePostPage() {
   // 최종 제출
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // 필수 데이터 Validation
     if (!departureDate) {
       alert('출발 시간을 선택해주세요!')
+      return
+    }
+    if (!depLat || !depLng) {
+      alert('출발지를 지정해주세요!')
+      return
+    }
+    if (!destLat || !destLng) {
+      alert('도착지를 지정해주세요!')
       return
     }
 
@@ -382,8 +398,6 @@ export default function CreatePostPage() {
       title,
       departure: depAddress || depLandmark,
       destination: destAddress || destLandmark,
-      lat: depLat,
-      lng: depLng,
       dep_lat: depLat,
       dep_lng: depLng,
       dest_lat: destLat,
@@ -398,6 +412,8 @@ export default function CreatePostPage() {
       account_number: finalAccountNumber.replace(/-/g, '') || null,
       user_id: userId,
     }
+
+    console.log("DB 전송 데이터:", newPost)
 
     const { data: inserted, error: insertError } = await supabase
       .from('posts')
@@ -715,8 +731,8 @@ export default function CreatePostPage() {
               <button
                 form="createForm"
                 type="submit"
-                className="w-full h-16 rounded-2xl bg-[#00A651] text-white font-bold text-[18px] shadow-[0_8px_30px_rgba(0,166,81,0.25)] hover:bg-[#008f46] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 pointer-events-auto"
-                disabled={isSubmitting || !departureDate}
+                className="w-full h-16 rounded-2xl bg-[#00A651] text-white font-bold text-[18px] shadow-[0_8px_30px_rgba(0,166,81,0.25)] hover:bg-[#008f46] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:bg-gray-400 disabled:shadow-none pointer-events-auto"
+                disabled={isSubmitting || !departureDate || !depLat || !depLng || !destLat || !destLng}
               >
                 {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : '합승 만들기'}
               </button>

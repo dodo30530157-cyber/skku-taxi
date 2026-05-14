@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Camera, ScanFace, Search } from 'lucide-react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useUserStore } from '@/lib/store'
 
@@ -75,6 +76,8 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
+  const [isAgreed, setIsAgreed] = useState(false)
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false)
   
   // OTP Auth 상태
   const [isOtpSent, setIsOtpSent] = useState(false)
@@ -308,6 +311,10 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
   // 하단 다음 버튼 핸들러
   const handleNext = () => {
     if (step === 1) {
+      if (!isAgreed) {
+        alert("서비스 이용을 위해 개인정보 처리방침에 동의해 주세요.");
+        return;
+      }
       if (isLoginMode) {
         handleLoginWithPassword()
       } else {
@@ -899,6 +906,20 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
       {/* ── 하단 플로팅 버튼 ── */}
       {step < 5 && !showFaceIdLogin && (
         <div className="fixed bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pb-8">
+          {step === 1 && (
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <input 
+                type="checkbox" 
+                id="privacy-agree" 
+                checked={isAgreed}
+                onChange={(e) => setIsAgreed(e.target.checked)}
+                className="w-4 h-4 accent-gray-900 rounded cursor-pointer shrink-0" 
+              />
+              <label htmlFor="privacy-agree" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                (필수) <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsPrivacyModalOpen(true); }} className="text-blue-600 hover:text-blue-800 underline underline-offset-2 bg-transparent border-none p-0 cursor-pointer">개인정보 처리방침</button>에 동의합니다.
+              </label>
+            </div>
+          )}
           <button
             onClick={handleNext}
             disabled={isSubmitting || (step === 1 && (!isLoginMode ? !isOtpSent || code.length < 6 : !email || !password))}
@@ -914,6 +935,60 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
               step === 4 ? '시작하기' : '다음'
             )}
           </button>
+        </div>
+      )}
+
+      {/* 개인정보 처리방침 모달 */}
+      {isPrivacyModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="p-6 overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">개인정보 처리방침</h2>
+              <p className="text-sm text-gray-600 mb-4 font-medium">성균관대학교 학생 전용 택시 동승 매칭 서비스 'SKKU TAXI'는 이용자의 개인정보를 소중하게 다룹니다.</p>
+              
+              <div className="space-y-4">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제1조 (목적)</strong><br />
+                  본 방침은 성균관대학교 학생 전용 택시 동승 매칭 서비스 'SKKU TAXI'(이하 ‘서비스’)가 이용자의 개인정보를 어떻게 수집, 이용, 보호하는지 안내하기 위해 작성되었습니다.
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제2조 (수집 항목)</strong><br />
+                  - 필수: 성명/닉네임, 학교 인증용 이메일, 접속 로그, 서비스 이용 기록<br />
+                  - 선택: 정산용 은행명 및 계좌번호, 프로필 사진<br />
+                  - 위치 정보: 출발지/목적지 설정 데이터 (서버 영구 저장 안 함)
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제3조 (이용 목적)</strong><br />
+                  이용자 식별, 매칭 서비스 제공, 정산 지원(계좌 정보 노출).
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제4조 (보유 및 파기)</strong><br />
+                  회원 탈퇴 시 즉시 파기 원칙. (단, 관련 법령에 따른 보존 필요 시 해당 기간까지 보관)
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제5조 (제3자 제공)</strong><br />
+                  사전 동의 시(매칭 성공 시 상대방에게 계좌 노출) 또는 법령에 의거한 경우 외 제공 안 함.
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제6조 (권리와 의무)</strong><br />
+                  언제든 조회/수정/탈퇴 가능. 최신 정보 유지 의무는 이용자에게 있음.
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong>제7조 (보호책임자)</strong><br />
+                  책임자 [디엔이앤코], 문의 [dodo3053@g.skku.edu].
+                </p>
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-200 flex justify-end">
+              <button 
+                type="button" 
+                onClick={() => setIsPrivacyModalOpen(false)}
+                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-black font-medium transition-colors"
+              >
+                확인
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

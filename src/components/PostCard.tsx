@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { MapPin, Clock, Users, ArrowRight, MessageCircle, Navigation, MessageSquare, User } from 'lucide-react'
+import { MapPin, Clock, Users, ArrowRight, MessageCircle, Navigation, MessageSquare, User, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { MiniMap } from '@/components/MiniMap'
 import { useRouter } from 'next/navigation'
@@ -25,8 +25,8 @@ interface PostProps {
   user_id?: string
   dep_lat?: number
   dep_lng?: number
-  lat?: number
-  lng?: number
+  dest_lat?: number
+  dest_lng?: number
   avatar_url?: string
   note?: string
   gender_condition?: string
@@ -37,7 +37,7 @@ interface PostProps {
   } | null
 }
 
-export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideMiniMap?: boolean }) {
+export function PostCard({ post }: { post: PostProps }) {
   const { t } = useLanguage()
   const profileImageUrl = useUserStore((state) => state.profileImageUrl)
   const myNickname = useUserStore((state) => state.nickname)
@@ -124,9 +124,14 @@ export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideM
 
       // 알림 생성 (댓글 작성자가 방장이 아닐 때 방장에게 알림)
       if (post.user_id && !isAuthor) {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const currentUserId = sessionData?.session?.user?.id
+
         await supabase.from('notifications').insert([
           {
             user_id: post.user_id,
+            sender_id: currentUserId || null,
+            post_id: post.id,
             message: '새 댓글이 달렸습니다! 💬',
             is_read: false
           }
@@ -178,9 +183,14 @@ export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideM
 
     // 알림 생성 (작성자에게)
     if (post.user_id) {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const currentUserId = sessionData?.session?.user?.id
+
       await supabase.from('notifications').insert([
         {
           user_id: post.user_id,
+          sender_id: currentUserId || null,
+          post_id: post.id,
           message: '누군가 합승에 참여했습니다! 🚕',
           is_read: false
         }
@@ -226,6 +236,28 @@ export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideM
     }
   }
 
+  const handleDelete = async () => {
+    if (!confirm('정말로 이 방을 삭제하시겠습니까?\n(삭제된 데이터는 복구할 수 없습니다.)')) return
+
+    setIsLoading(true)
+
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', post.id)
+
+    setIsLoading(false)
+
+    if (error) {
+      console.error('삭제 실패:', error)
+      alert(`삭제 실패: ${error.message}`)
+      return
+    }
+
+    alert('게시글이 삭제되었습니다.')
+    window.location.reload()
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const month = date.getMonth() + 1
@@ -261,11 +293,20 @@ export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideM
             </div>
             <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{post.title}</h3>
           </div>
-          <span className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${
-            status === '모집중' && !isClosed ? 'bg-[#006341]/10 text-[#006341]' : 'bg-gray-100 text-gray-500'
-          }`}>
-            {isExpired ? '시간 만료' : isFull ? '마감' : status}
-          </span>
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+              status === '모집중' && !isClosed ? 'bg-[#006341]/10 text-[#006341]' : 'bg-gray-100 text-gray-500'
+            }`}>
+              {isExpired ? '시간 만료' : isFull ? '마감' : status}
+            </span>
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleDelete(); }} 
+              className="text-red-400 hover:text-red-600 transition-colors bg-red-50 hover:bg-red-100 p-1.5 rounded-full"
+              title="게시글 삭제"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* 출발 → 도착 */}
@@ -281,10 +322,17 @@ export function PostCard({ post, hideMiniMap = false }: { post: PostProps, hideM
           <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
           <span>{formatDate(post.departureTime)} {t('post.time.prefix')}</span>
         </div>
-        
-        {/* 미니맵 (지도 모달 등에서는 숨김 처리) */}
-        {post.dep_lat && post.dep_lng && !hideMiniMap && (
-          <MiniMap lat={post.dep_lat} lng={post.dep_lng} />
+
+        {/* 미니맵 */}
+        {post.dep_lat && post.dep_lng && (
+          <MiniMap 
+            lat={post.dep_lat} 
+            lng={post.dep_lng} 
+            destLat={post.dest_lat} 
+            destLng={post.dest_lng}
+            departureName={post.departure}
+            destinationName={post.destination}
+          />
         )}
 
         {/* 인원 프로그레스 바 */}

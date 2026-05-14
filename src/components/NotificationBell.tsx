@@ -12,14 +12,49 @@ export function NotificationBell({ session }: { session: any }) {
     if (!session?.user?.id) return
 
     const fetchNotifications = async () => {
-      const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
+      try {
+        // 1. 단순 select('*')로 롤백 (JOIN 에러 방지)
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(20)
 
-      if (data) setNotifications(data)
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          // 2. sender_id 추출 후 한 번의 추가 쿼리로 닉네임 가져오기 (클라이언트 측 매핑)
+          const senderIds = Array.from(new Set(data.map(n => n.sender_id).filter(Boolean)))
+          
+          if (senderIds.length > 0) {
+            const { data: profilesData } = await supabase
+              .from('profiles')
+              .select('id, nickname')
+              .in('id', senderIds)
+            
+            // 3. 매핑 객체 생성 및 기존 데이터에 병합
+            const profileMap = (profilesData || []).reduce((acc: any, p: any) => {
+              acc[p.id] = p.nickname
+              return acc
+            }, {})
+
+            const mappedData = data.map(n => {
+              if (n.sender_id && profileMap[n.sender_id]) {
+                return { ...n, sender: { nickname: profileMap[n.sender_id] } }
+              }
+              return n
+            })
+            
+            setNotifications(mappedData)
+          } else {
+            setNotifications(data)
+          }
+        }
+      } catch (err) {
+        console.error('알림 로드 실패 (무시됨):', err)
+        // 에러가 나도 앱 구동에 영향을 주지 않도록 조용히 넘김
+      }
     }
 
     fetchNotifications()
@@ -80,8 +115,20 @@ export function NotificationBell({ session }: { session: any }) {
               </div>
             ) : (
               notifications.map((noti) => (
-                <div key={noti.id} className="px-3 py-2.5 hover:bg-gray-50 rounded-lg transition-colors text-[13px] text-gray-700 leading-tight border border-transparent hover:border-gray-100">
-                  {noti.message}
+                <div 
+                  key={noti.id} 
+                  onClick={() => {
+                    if (noti.post_id) {
+                      window.location.href = `/chat/${noti.post_id}`
+                    }
+                  }}
+                  className={`px-3 py-2.5 rounded-lg transition-colors text-[13px] text-gray-700 leading-tight border ${
+                    noti.post_id ? 'cursor-pointer hover:bg-gray-50 border-transparent hover:border-gray-100' : 'border-transparent'
+                  }`}
+                >
+                  {noti.sender?.nickname 
+                    ? `${noti.sender.nickname}님이 댓글을 남겼습니다! 💬`
+                    : noti.message}
                 </div>
               ))
             )}

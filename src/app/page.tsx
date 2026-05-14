@@ -360,7 +360,7 @@ export default function Home() {
             </div>
             {/* Scrollable Content */}
             <div className="max-h-[75vh] overflow-y-auto scrollbar-hide pb-10">
-              <PostCard post={selectedPost} hideMiniMap={true} />
+              <PostCard post={selectedPost} />
             </div>
           </div>
         </>
