@@ -221,12 +221,12 @@ export function ProfileModal() {
             <img
               src={profileImageUrl}
               alt="내 프로필"
-              className="w-8 h-8 rounded-full object-cover border-2 border-white ring-1 ring-gray-200 shadow-sm group-hover:ring-[#00A651] transition-all"
+              className="w-8 h-8 rounded-full object-cover border-2 border-white ring-1 ring-gray-200 shadow-sm group-hover:ring-[#2563EB] transition-all"
             />
-            <span className="text-[14px] font-bold text-gray-600 group-hover:text-[#00A651] transition-colors">내 활동</span>
+            <span className="text-[14px] font-bold text-gray-600 group-hover:text-[#2563EB] transition-colors">내 활동</span>
           </>
         ) : (
-          <span className="text-gray-600 hover:text-[#00A651] transition-colors text-[15px] font-bold">내 활동</span>
+          <span className="text-gray-600 hover:text-[#2563EB] transition-colors text-[15px] font-bold">내 활동</span>
         )}
       </button>
 
@@ -246,7 +246,7 @@ export function ProfileModal() {
                 </p>
                 <button 
                   onClick={() => { setIsOpen(false); router.push('/login'); }}
-                  className="w-full h-14 bg-[#00A651] active:bg-[#008f46] transition-colors text-white font-bold text-[17px] rounded-2xl shadow-[0_8px_20px_rgba(0,166,81,0.25)]"
+                  className="w-full h-14 bg-[#2563EB] active:bg-[#1D4ED8] transition-colors text-white font-bold text-[17px] rounded-2xl shadow-[0_8px_20px_rgba(0,166,81,0.25)]"
                 >
                   3초 만에 시작하기
                 </button>
@@ -272,7 +272,7 @@ export function ProfileModal() {
               {/* 로딩 표시 */}
               {isFetching && (
                 <div className="absolute inset-0 bg-white/70 z-20 flex flex-col items-center justify-center rounded-[2rem] backdrop-blur-sm">
-                  <div className="w-10 h-10 border-4 border-gray-100 border-t-[#00A651] rounded-full animate-spin"></div>
+                  <div className="w-10 h-10 border-4 border-gray-100 border-t-[#2563EB] rounded-full animate-spin"></div>
                 </div>
               )}
 
@@ -294,7 +294,7 @@ export function ProfileModal() {
                         </div>
                       )}
                       {/* 카메라 뱃지 */}
-                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#00A651] rounded-full flex items-center justify-center border-2 border-white shadow-sm group-hover:bg-[#008f46] transition-colors">
+                      <div className="absolute bottom-0 right-0 w-6 h-6 bg-[#2563EB] rounded-full flex items-center justify-center border-2 border-white shadow-sm group-hover:bg-[#1D4ED8] transition-colors">
                         <Camera className="w-3 h-3 text-white" />
                       </div>
                       <input
@@ -308,7 +308,7 @@ export function ProfileModal() {
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">{nickname || '스꾸러'}님</h3>
                       <p className="text-xs font-semibold text-gray-500">지구를 지키는 그린 라이더</p>
-                      <p className="text-[11px] text-[#00A651] font-medium mt-0.5">사진을 눌러 변경하기</p>
+                      <p className="text-[11px] text-[#2563EB] font-medium mt-0.5">사진을 눌러 변경하기</p>
                     </div>
                   </div>
 
@@ -319,7 +319,7 @@ export function ProfileModal() {
                     </div>
                     <div className="flex flex-col items-center justify-center bg-[#F2F4F6] rounded-2xl py-4 transition-transform active:scale-95 cursor-default">
                       <span className="text-[11px] text-gray-500 font-bold mb-1">절약한 돈</span>
-                      <span className="text-xl font-extrabold text-[#00A651]">8.5<span className="text-sm font-semibold text-[#00A651]/70 ml-0.5">만</span></span>
+                      <span className="text-xl font-extrabold text-[#2563EB]">8.5<span className="text-sm font-semibold text-[#2563EB]/70 ml-0.5">만</span></span>
                     </div>
                     <div className="flex flex-col items-center justify-center bg-[#F2F4F6] rounded-2xl py-4 transition-transform active:scale-95 cursor-default relative overflow-hidden">
                       <div className="absolute -right-2 -bottom-2 opacity-10 text-4xl">🌱</div>
@@ -343,7 +343,7 @@ export function ProfileModal() {
                         placeholder="예: 성균관다람쥐"
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
-                        className="w-full h-14 bg-white rounded-2xl px-4 font-bold text-[16px] text-gray-900 border-none focus:ring-2 focus:ring-[#00A651]/20 transition-all placeholder:text-gray-300"
+                        className="w-full h-14 bg-white rounded-2xl px-4 font-bold text-[16px] text-gray-900 border-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all placeholder:text-gray-300"
                       />
                     </div>
 
@@ -354,7 +354,7 @@ export function ProfileModal() {
                         <select
                           value={bankName}
                           onChange={e => setBankName(e.target.value)}
-                          className="w-[110px] shrink-0 h-14 bg-white rounded-xl border border-gray-100 px-2 font-bold text-[15px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#00A651]/20 transition-all appearance-none text-center cursor-pointer"
+                          className="w-[110px] shrink-0 h-14 bg-white rounded-xl border border-gray-100 px-2 font-bold text-[15px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all appearance-none text-center cursor-pointer"
                         >
                           <option value="">은행 선택</option>
                           <option value="토스뱅크">토스뱅크</option>
@@ -371,7 +371,7 @@ export function ProfileModal() {
                           placeholder="계좌번호 (숫자만)"
                           value={accountNumber}
                           onChange={e => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ''))}
-                          className="flex-1 min-w-0 overflow-hidden h-14 bg-white rounded-xl border border-gray-100 px-4 font-bold text-[16px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#00A651]/20 transition-all placeholder:text-gray-300 tracking-wide"
+                          className="flex-1 min-w-0 overflow-hidden h-14 bg-white rounded-xl border border-gray-100 px-4 font-bold text-[16px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all placeholder:text-gray-300 tracking-wide"
                         />
                       </div>
                       <p className="text-[12px] font-medium text-gray-400 ml-1 mt-1.5">이 계좌는 합승 만들기 시 자동으로 입력됩니다.</p>
@@ -385,7 +385,7 @@ export function ProfileModal() {
               <div className="mt-8 space-y-4">
                 <button
                   type="button"
-                  className="w-full h-16 bg-[#00A651] hover:bg-[#008f46] active:scale-[0.98] transition-all text-white font-bold text-[18px] rounded-2xl shadow-[0_8px_24px_rgba(0,166,81,0.3)] flex items-center justify-center"
+                  className="w-full h-16 bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.98] transition-all text-white font-bold text-[18px] rounded-2xl shadow-[0_8px_24px_rgba(0,166,81,0.3)] flex items-center justify-center"
                   onClick={handleSave}
                   disabled={loading}
                 >
@@ -399,7 +399,7 @@ export function ProfileModal() {
                 <button
                   type="button"
                   onClick={async () => {
-                    const confirmed = window.confirm("정말 스꾸택시를 탈퇴하시겠습니까?\n모든 탑승 기록과 정보가 영구적으로 삭제됩니다.");
+                    const confirmed = window.confirm("정말 가치타를 탈퇴하시겠습니까?\n모든 탑승 기록과 정보가 영구적으로 삭제됩니다.");
                     if (!confirmed || !session) return;
 
                     setLoading(true);
@@ -425,7 +425,7 @@ export function ProfileModal() {
                       clearUser();
                       await supabase.auth.signOut();
                       
-                      alert("그동안 스꾸택시를 이용해주셔서 감사합니다. 탈퇴가 완료되었습니다.");
+                      alert("그동안 가치타를 이용해주셔서 감사합니다. 탈퇴가 완료되었습니다.");
                       router.push('/login');
                       router.refresh();
                     } catch (err: any) {
@@ -438,6 +438,23 @@ export function ProfileModal() {
                 >
                   회원 탈퇴하기
                 </button>
+
+                {/* 상대방 프로필 모달용 (Mock) 신고 및 차단 버튼 */}
+                <div className="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const confirmed = window.confirm("이 사용자를 차단하시겠습니까?\n차단 시 서로의 팟 목록과 채팅이 보이지 않습니다.");
+                      if (confirmed) {
+                        useUserStore.getState().blockUser('mock_opponent_id');
+                        alert("정상적으로 차단 및 신고가 접수되었습니다.");
+                      }
+                    }}
+                    className="text-[11px] font-medium text-gray-300 hover:text-red-400 transition-colors"
+                  >
+                    신고 및 차단하기
+                  </button>
+                </div>
               </div>
 
             </div>

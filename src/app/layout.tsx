@@ -14,18 +14,23 @@ import { LanguageToggle } from '@/components/LanguageToggle'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SKKU TAXI — 성대 택시 합승',
+  title: '가치타',
   description: '성균관대 학우들과 택시비를 절약하는 합승 앱',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: '스꾸택시',
+    title: '가치타',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#00A651',
+  themeColor: '#2563EB',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -40,32 +45,16 @@ export default function RootLayout({
         <LanguageProvider>
           <SplashScreen />
           <Onboarding />
-          <div className="min-h-screen bg-gray-50 flex flex-col">
+          <div className="min-h-screen bg-gray-50 flex flex-col pb-[env(safe-area-inset-bottom)]">
             {/* ── 헤더 ── */}
-            <header className="bg-white border-b border-gray-100 sticky top-0 z-30 w-full shadow-[0_1px_12px_rgba(0,0,0,0.06)]">
+            <header className="bg-white border-b border-gray-100 sticky top-0 z-30 w-full shadow-[0_1px_12px_rgba(0,0,0,0.06)] pt-[env(safe-area-inset-top)]">
               <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
 
                 {/* 워드마크 로고 */}
                 <Link href="/" className="flex items-center gap-2 select-none group">
-                  {/* Glyph: 위치핀+자동차 조합 SVG */}
-                  <div className="w-8 h-8 rounded-xl bg-[#006341] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
-                      {/* 자동차 바디 */}
-                      <rect x="3" y="10" width="18" height="7" rx="2" stroke="white" strokeWidth="1.6" fill="none"/>
-                      {/* 차 지붕 */}
-                      <path d="M7 10V8.5C7 7.7 7.5 7 8.2 6.7L11 5.5C11.6 5.2 12.4 5.2 13 5.5L15.8 6.7C16.5 7 17 7.7 17 8.5V10" stroke="white" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
-                      {/* 왼쪽 바퀴 */}
-                      <circle cx="7.5" cy="17" r="2" stroke="white" strokeWidth="1.6" fill="none"/>
-                      {/* 오른쪽 바퀴 */}
-                      <circle cx="16.5" cy="17" r="2" stroke="white" strokeWidth="1.6" fill="none"/>
-                      {/* 위치 핀 도트 */}
-                      <circle cx="12" cy="9" r="1.1" fill="#FFD200"/>
-                    </svg>
-                  </div>
                   {/* 타이포 */}
                   <div className="flex flex-col leading-none">
-                    <span className="text-[15px] font-black tracking-tight text-[#006341]">SKKU TAXI</span>
-                    <span className="text-[9px] font-semibold text-gray-400 tracking-widest uppercase">성대 택시 합승</span>
+                    <span className="text-[17px] font-black tracking-tighter text-blue-600">GACHITA</span>
                   </div>
                 </Link>
 

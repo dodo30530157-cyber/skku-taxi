@@ -87,7 +87,7 @@ export function AuthNav() {
       ) : (
         <Link
           href="/login"
-          className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#006341] hover:bg-[#006341]/10 transition-all"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#0047FF] hover:bg-[#0047FF]/10 transition-all"
           title="로그인"
         >
           <LogIn className="w-4 h-4" />

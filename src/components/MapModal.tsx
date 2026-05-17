@@ -99,7 +99,7 @@ export function MapModal({ isOpen, onClose, onSelect, title = '지도에서 위�
         {/* 상단 헤더 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0">
           <h2 className="font-bold text-gray-900 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-[#006341]" />
+            <MapPin className="w-5 h-5 text-[#0047FF]" />
             {title}
           </h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
@@ -115,11 +115,11 @@ export function MapModal({ isOpen, onClose, onSelect, title = '지도에서 위�
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="장소, 도로명, 지역 검색..."
-              className="flex-1 h-9 px-3 text-sm rounded-lg border border-gray-200 focus:outline-none focus:border-[#006341] focus:ring-1 focus:ring-[#006341] transition-colors"
+              className="flex-1 h-9 px-3 text-sm rounded-lg border border-gray-200 focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] transition-colors"
             />
             <button
               type="submit"
-              className="h-9 px-4 text-sm font-semibold rounded-lg bg-[#006341] text-white hover:bg-[#006341]/90 transition-colors shrink-0"
+              className="h-9 px-4 text-sm font-semibold rounded-lg bg-[#0047FF] text-white hover:bg-[#0047FF]/90 transition-colors shrink-0"
             >
               검색
             </button>
@@ -150,7 +150,7 @@ export function MapModal({ isOpen, onClose, onSelect, title = '지도에서 위�
                 <MapMarker position={position} />
               </Map>
               {!address && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-gray-100 z-10 text-sm font-bold text-[#006341] pointer-events-none flex items-center gap-1.5 whitespace-nowrap">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-gray-100 z-10 text-sm font-bold text-[#0047FF] pointer-events-none flex items-center gap-1.5 whitespace-nowrap">
                   지도를 클릭해서 위치를 선택하세요
                 </div>
               )}
@@ -161,8 +161,8 @@ export function MapModal({ isOpen, onClose, onSelect, title = '지도에서 위�
         {/* 하단 선택 주소 + 버튼 */}
         <div className="p-4 shrink-0 bg-white border-t border-gray-100 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
           <div className="flex items-start gap-3 mb-4">
-            <div className="mt-0.5 bg-[#006341]/10 p-2 rounded-full shrink-0">
-              <MapPin className="w-4 h-4 text-[#006341]" />
+            <div className="mt-0.5 bg-[#0047FF]/10 p-2 rounded-full shrink-0">
+              <MapPin className="w-4 h-4 text-[#0047FF]" />
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-0.5">선택된 주소</p>
@@ -173,7 +173,7 @@ export function MapModal({ isOpen, onClose, onSelect, title = '지도에서 위�
           </div>
 
           <Button
-            className="w-full h-12 bg-[#006341] hover:bg-[#006341]/90 text-white font-semibold text-base transition-all rounded-xl"
+            className="w-full h-12 bg-[#0047FF] hover:bg-[#0047FF]/90 text-white font-semibold text-base transition-all rounded-xl"
             onClick={() => {
               if (address) {
                 onSelect(address, position.lat, position.lng);

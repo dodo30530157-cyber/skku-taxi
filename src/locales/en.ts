@@ -9,11 +9,11 @@ export const en: Record<TranslationKey, string> = {
   'common.search': 'Search',
 
   // Layout / Header
-  'header.title': 'SKKU TAXI',
-  'header.subtitle': 'Carpooling App',
+  'header.title': 'GACHITA',
+  'header.subtitle': 'GACHITA',
 
   // SplashScreen
-  'splash.title': 'SKKU TAXI',
+  'splash.title': 'GACHITA',
 
   // Onboarding
   'onboarding.slide1.title': 'No more waiting for taxis! 🚕',
@@ -22,7 +22,7 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.slide2.desc': 'Verified students & gender filters for safe night rides.',
   'onboarding.slide3.title': 'Easy Split Payments 💸',
   'onboarding.slide3.desc': 'Settle the fare easily with an integrated bank link.',
-  'onboarding.start': 'Start SKKU Taxi',
+  'onboarding.start': 'Start GACHITA',
 
   // Main Page
   'main.hero.title': 'Where are you going? 🚕',

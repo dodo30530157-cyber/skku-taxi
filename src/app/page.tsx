@@ -188,7 +188,7 @@ export default function Home() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder={t('main.search.placeholder')}
-            className="w-full h-13 pl-11 pr-5 rounded-full border border-gray-200 bg-white text-sm shadow-md shadow-gray-100 focus:outline-none focus:border-[#006341] focus:ring-2 focus:ring-[#006341]/15 transition-all placeholder:text-gray-400 font-medium"
+            className="w-full h-13 pl-11 pr-5 rounded-full border border-gray-200 bg-white text-sm shadow-md shadow-gray-100 focus:outline-none focus:border-[#0047FF] focus:ring-2 focus:ring-[#0047FF]/15 transition-all placeholder:text-gray-400 font-medium"
             style={{ height: '52px' }}
           />
         </div>
@@ -203,8 +203,8 @@ export default function Home() {
                 onClick={() => setSearchQuery(active ? '' : chip.label)}
                 className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold border transition-all active:scale-95 ${
                   active
-                    ? 'bg-[#006341] text-white border-[#006341] shadow-sm'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#006341]/40 hover:text-[#006341]'
+                    ? 'bg-[#0047FF] text-white border-[#0047FF] shadow-sm'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#0047FF]/40 hover:text-[#0047FF]'
                 }`}
               >
                 <span>{chip.icon}</span>
@@ -224,7 +224,7 @@ export default function Home() {
               onClick={() => setCampusFilter(c)}
               className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all border ${
                 campusFilter === c
-                  ? 'bg-[#006341] text-white border-[#006341] shadow-sm'
+                  ? 'bg-[#0047FF] text-white border-[#0047FF] shadow-sm'
                   : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
               }`}
             >
@@ -262,7 +262,7 @@ export default function Home() {
           ) : filteredPosts.length === 0 ? (
             /* ── 빈 상태 ── */
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-24 h-24 bg-[#006341]/5 rounded-full flex items-center justify-center mb-5">
+              <div className="w-24 h-24 bg-[#0047FF]/5 rounded-full flex items-center justify-center mb-5">
                 <span className="text-5xl">🚕</span>
               </div>
               <p className="text-lg font-bold text-gray-800">
@@ -272,7 +272,7 @@ export default function Home() {
                 {searchQuery ? t('main.empty.search_desc') : t('main.empty.desc')}
               </p>
               <Link href="/create" onClick={handleCreateClick}>
-                <button className="px-7 py-3.5 bg-[#006341] text-white font-bold rounded-2xl shadow-md hover:bg-[#006341]/90 transition-all active:scale-95 text-sm">
+                <button className="px-7 py-3.5 bg-[#0047FF] text-white font-bold rounded-2xl shadow-md hover:bg-[#0047FF]/90 transition-all active:scale-95 text-sm">
                   {t('main.btn.create')}
                 </button>
               </Link>
@@ -334,7 +334,7 @@ export default function Home() {
 
           {/* FAB 버튼 */}
           <Link href="/create" className="pointer-events-auto" onClick={handleCreateClick}>
-            <button className="flex items-center justify-center gap-2 px-5 h-[48px] rounded-full bg-[#006341] text-white font-bold text-[13px] shadow-[0_4px_20px_rgba(0,99,65,0.4)] hover:bg-[#005235] active:scale-95 transition-all">
+            <button className="flex items-center justify-center gap-2 px-5 h-[48px] rounded-full bg-[#0047FF] text-white font-bold text-[13px] shadow-[0_4px_20px_rgba(0,99,65,0.4)] hover:bg-[#003DDB] active:scale-95 transition-all">
               <PlusCircle className="w-5 h-5 shrink-0" />
               {t('main.btn.create_fab')}
             </button>

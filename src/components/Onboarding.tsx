@@ -92,7 +92,7 @@ export function Onboarding() {
             <div
               key={idx}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'bg-[#006341] w-5' : 'bg-gray-200'
+                idx === currentIndex ? 'bg-[#0047FF] w-5' : 'bg-gray-200'
               }`}
             />
           ))}
@@ -104,7 +104,7 @@ export function Onboarding() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={handleStart}
-              className="w-full h-full rounded-2xl bg-[#006341] text-white font-bold text-[15px] shadow-[0_4px_20px_rgba(0,99,65,0.3)] hover:bg-[#005235] active:scale-95 transition-all"
+              className="w-full h-full rounded-2xl bg-[#0047FF] text-white font-bold text-[15px] shadow-[0_4px_20px_rgba(0,99,65,0.3)] hover:bg-[#003DDB] active:scale-95 transition-all"
             >
               {t('onboarding.start')}
             </motion.button>
@@ -118,7 +118,7 @@ export function Onboarding() {
               </button>
               <button 
                 onClick={handleNext}
-                className="text-[15px] font-bold text-[#006341] p-2 hover:text-[#005235] transition-colors"
+                className="text-[15px] font-bold text-[#0047FF] p-2 hover:text-[#003DDB] transition-colors"
               >
                 {t('common.next')}
               </button>

@@ -95,7 +95,7 @@ export function NotificationBell({ session }: { session: any }) {
     <div className="relative">
       <button 
         onClick={handleOpen}
-        className="relative p-1.5 text-gray-600 hover:text-[#006341] transition-colors rounded-full"
+        className="relative p-1.5 text-gray-600 hover:text-[#0047FF] transition-colors rounded-full"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (

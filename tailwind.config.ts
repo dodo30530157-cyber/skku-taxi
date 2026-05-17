@@ -25,7 +25,7 @@ const config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#006341", // SKKU Green Default Override
+          DEFAULT: "#0047FF", // SKKU Green Default Override
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {

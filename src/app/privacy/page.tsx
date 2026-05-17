@@ -2,7 +2,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto p-8 text-gray-800 leading-relaxed min-h-screen bg-white">
       <h1 className="text-3xl font-bold mb-8">개인정보 처리방침</h1>
-      <p className="mb-6 font-medium text-gray-600">성균관대학교 학생 전용 택시 동승 매칭 서비스 'SKKU TAXI'(이하 ‘서비스’)는 이용자의 개인정보를 소중하게 다룹니다.</p>
+      <p className="mb-6 font-medium text-gray-600">성균관대학교 학생 전용 택시 동승 매칭 서비스 '가치타(GACHITA)'(이하 ‘서비스’)는 이용자의 개인정보를 소중하게 다룹니다.</p>
       
       <section className="mb-8">
         <h2 className="text-xl font-bold mb-4">제1조 (목적)</h2>

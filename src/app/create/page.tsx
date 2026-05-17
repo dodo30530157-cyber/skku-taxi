@@ -443,7 +443,7 @@ export default function CreatePostPage() {
   if (isDataLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-white">
-        <div className="w-10 h-10 border-4 border-gray-100 border-t-[#00A651] rounded-full animate-spin mb-3" />
+        <div className="w-10 h-10 border-4 border-gray-100 border-t-[#2563EB] rounded-full animate-spin mb-3" />
       </div>
     )
   }
@@ -549,7 +549,7 @@ export default function CreatePostPage() {
 
                 {/* 목적지 입력창 */}
                 <div className="relative">
-                  <div className="absolute top-1/2 left-4 -translate-y-1/2 w-2 h-2 rounded-full bg-[#00A651]" />
+                  <div className="absolute top-1/2 left-4 -translate-y-1/2 w-2 h-2 rounded-full bg-[#2563EB]" />
                   <button 
                     onClick={() => setIsDestModalOpen(true)}
                     className={`w-full h-auto min-h-[4rem] py-3 pl-10 pr-12 rounded-2xl text-left transition-all border-none focus:outline-none flex flex-col justify-center active:bg-gray-200 ${
@@ -577,7 +577,7 @@ export default function CreatePostPage() {
                     onClick={() => setQuickDestination(dest.label, dest.lat, dest.lng, dest.address)}
                     className={`shrink-0 px-4 h-10 rounded-full border font-bold text-[14px] transition-all shadow-sm ${
                       destLandmark === dest.label
-                        ? 'bg-[#00A651] border-[#00A651] text-white shadow-[0_4px_12px_rgba(0,166,81,0.2)]'
+                        ? 'bg-[#2563EB] border-[#2563EB] text-white shadow-[0_4px_12px_rgba(0,166,81,0.2)]'
                         : 'bg-gray-50 border-gray-100 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -592,7 +592,7 @@ export default function CreatePostPage() {
                   else setStep(2)
                 }}
                 disabled={!destLandmark}
-                className="w-full h-16 bg-[#00A651] text-white font-bold text-[18px] rounded-2xl mt-1 shadow-[0_8px_30px_rgba(0,166,81,0.25)] hover:bg-[#008f46] active:scale-[0.98] transition-all disabled:opacity-50 disabled:shadow-none flex justify-center items-center gap-2"
+                className="w-full h-16 bg-[#2563EB] text-white font-bold text-[18px] rounded-2xl mt-1 shadow-[0_8px_30px_rgba(0,166,81,0.25)] hover:bg-[#1D4ED8] active:scale-[0.98] transition-all disabled:opacity-50 disabled:shadow-none flex justify-center items-center gap-2"
               >
                 다음
               </button>
@@ -627,7 +627,7 @@ export default function CreatePostPage() {
                   <div className="flex flex-col items-center justify-between py-1">
                     <div className="w-2.5 h-2.5 rounded-full bg-gray-900" />
                     <div className="w-0.5 h-12 bg-gray-300" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#00A651]" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />
                   </div>
                   <div className="flex flex-col justify-between flex-1 gap-4">
                     <div className="flex flex-col gap-0.5">
@@ -635,7 +635,7 @@ export default function CreatePostPage() {
                       <p className="text-[13px] font-medium text-gray-500 truncate">{depAddress}</p>
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <p className="text-[16px] font-bold text-[#00A651] truncate">{destLandmark}</p>
+                      <p className="text-[16px] font-bold text-[#2563EB] truncate">{destLandmark}</p>
                       <p className="text-[13px] font-medium text-gray-500 truncate">{destAddress}</p>
                     </div>
                   </div>
@@ -653,7 +653,7 @@ export default function CreatePostPage() {
                 {/* 제목 */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-500 ml-1">게시글 제목 <span className="font-normal opacity-60">(자동 완성)</span></label>
-                  <input name="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all text-[16px]" />
+                  <input name="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-bold text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2563EB] transition-all text-[16px]" />
                 </div>
 
                 {/* 시간 및 인원 */}
@@ -662,7 +662,7 @@ export default function CreatePostPage() {
                     <label className="text-sm font-semibold text-gray-500 ml-1">출발 시간</label>
                     <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-5 px-5 md:mx-0 md:px-0">
                       {[ { label: '지금 바로', value: 0 }, { label: '10분 뒤', value: 10 }, { label: '20분 뒤', value: 20 }, { label: '30분 뒤', value: 30 } ].map(chip => (
-                        <button key={chip.value} type="button" onClick={() => handleTimeOffset(chip.value)} className={`shrink-0 px-4 h-10 rounded-full text-[14px] font-bold transition-all duration-200 ${selectedTimeOffset === chip.value ? 'bg-[#00A651] text-white shadow-md shadow-[#00A651]/20' : 'bg-[#F2F4F6] text-gray-600 hover:bg-gray-200'}`}>
+                        <button key={chip.value} type="button" onClick={() => handleTimeOffset(chip.value)} className={`shrink-0 px-4 h-10 rounded-full text-[14px] font-bold transition-all duration-200 ${selectedTimeOffset === chip.value ? 'bg-[#2563EB] text-white shadow-md shadow-[#2563EB]/20' : 'bg-[#F2F4F6] text-gray-600 hover:bg-gray-200'}`}>
                           {chip.label}
                         </button>
                       ))}
@@ -676,7 +676,7 @@ export default function CreatePostPage() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-500 ml-1">탑승 인원</label>
-                    <select value={memberCount} onChange={e => setMemberCount(Number(e.target.value))} className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 appearance-none focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all text-[16px]">
+                    <select value={memberCount} onChange={e => setMemberCount(Number(e.target.value))} className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 appearance-none focus:outline-none focus:ring-1 focus:ring-[#2563EB] transition-all text-[16px]">
                       <option value={2}>2명 (본인 포함)</option>
                       <option value={3}>3명 (본인 포함)</option>
                       <option value={4}>4명 (본인 포함)</option>
@@ -687,7 +687,7 @@ export default function CreatePostPage() {
                 {/* 성별 조건 */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-500 ml-1">성별 조건</label>
-                  <select value={genderCondition} onChange={e => setGenderCondition(e.target.value)} className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 appearance-none focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all text-[16px]">
+                  <select value={genderCondition} onChange={e => setGenderCondition(e.target.value)} className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 appearance-none focus:outline-none focus:ring-1 focus:ring-[#2563EB] transition-all text-[16px]">
                     <option value="ANY">누구나 (성별 무관)</option>
                     <option value="SAME">동성만 탑승</option>
                   </select>
@@ -696,7 +696,7 @@ export default function CreatePostPage() {
                 {/* 상세 요청사항 */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-500 ml-1">상세 요청사항 <span className="font-normal opacity-60">(선택)</span></label>
-                  <textarea value={note} onChange={e => setNote(e.target.value)} rows={isNoteFocused || note ? 3 : 1} onFocus={() => setIsNoteFocused(true)} onBlur={() => setIsNoteFocused(false)} placeholder="짐 여부 등 남기고 싶은 말" className="w-full py-4 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00A651] resize-none transition-all duration-300 text-[16px]" />
+                  <textarea value={note} onChange={e => setNote(e.target.value)} rows={isNoteFocused || note ? 3 : 1} onFocus={() => setIsNoteFocused(true)} onBlur={() => setIsNoteFocused(false)} placeholder="짐 여부 등 남기고 싶은 말" className="w-full py-4 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2563EB] resize-none transition-all duration-300 text-[16px]" />
                 </div>
 
                 {/* 정산 계좌 */}
@@ -706,7 +706,7 @@ export default function CreatePostPage() {
                     <div className="bg-[#F2F4F6] rounded-2xl p-5 flex items-center justify-between">
                       <div>
                         <label className="flex items-center gap-3 cursor-pointer">
-                          <input type="checkbox" checked={useMyAccount} onChange={e => setUseMyAccount(e.target.checked)} className="w-5 h-5 accent-[#00A651] rounded cursor-pointer" />
+                          <input type="checkbox" checked={useMyAccount} onChange={e => setUseMyAccount(e.target.checked)} className="w-5 h-5 accent-[#2563EB] rounded cursor-pointer" />
                           <span className="text-gray-900 font-bold text-[16px]">내 계좌로 정산받기</span>
                         </label>
                         {useMyAccount && <p className="text-gray-500 text-sm mt-1 ml-8 font-medium">{bankName} {accountNumber.substring(0, 4)}***</p>}
@@ -715,11 +715,11 @@ export default function CreatePostPage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                      <select value={bankName} onChange={e => setBankName(e.target.value)} className="h-14 px-4 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium focus:outline-none focus:border-[#00A651] focus:ring-1 focus:ring-[#00A651]">
+                      <select value={bankName} onChange={e => setBankName(e.target.value)} className="h-14 px-4 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
                         <option value="">은행 선택</option>
                         {['토스뱅크', '카카오뱅크', '국민은행', '신한은행', '우리은행', '하나은행', '농협은행'].map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
-                      <input type="text" inputMode="numeric" value={accountNumber} onChange={e => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ''))} placeholder="계좌번호" className="h-14 px-4 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium focus:outline-none focus:border-[#00A651] focus:ring-1 focus:ring-[#00A651]" />
+                      <input type="text" inputMode="numeric" value={accountNumber} onChange={e => setAccountNumber(e.target.value.replace(/[^0-9-]/g, ''))} placeholder="계좌번호" className="h-14 px-4 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]" />
                     </div>
                   )}
                 </div>
@@ -731,7 +731,7 @@ export default function CreatePostPage() {
               <button
                 form="createForm"
                 type="submit"
-                className="w-full h-16 rounded-2xl bg-[#00A651] text-white font-bold text-[18px] shadow-[0_8px_30px_rgba(0,166,81,0.25)] hover:bg-[#008f46] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:bg-gray-400 disabled:shadow-none pointer-events-auto"
+                className="w-full h-16 rounded-2xl bg-[#2563EB] text-white font-bold text-[18px] shadow-[0_8px_30px_rgba(0,166,81,0.25)] hover:bg-[#1D4ED8] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:bg-gray-400 disabled:shadow-none pointer-events-auto"
                 disabled={isSubmitting || !departureDate || !depLat || !depLng || !destLat || !destLng}
               >
                 {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : '합승 만들기'}
@@ -793,10 +793,10 @@ export default function CreatePostPage() {
                     setDepartureDate(d)
                     setSelectedTimeOffset(null)
                   }}
-                  className="w-full h-16 bg-[#F2F4F6] rounded-2xl px-5 font-bold text-2xl text-center focus:outline-none focus:ring-2 focus:ring-[#00A651]/50 appearance-none"
+                  className="w-full h-16 bg-[#F2F4F6] rounded-2xl px-5 font-bold text-2xl text-center focus:outline-none focus:ring-2 focus:ring-[#2563EB]/50 appearance-none"
                 />
               </div>
-              <button type="button" onClick={() => setIsTimeSheetOpen(false)} className="w-full h-16 bg-[#00A651] text-white font-bold text-[18px] rounded-2xl active:scale-95 transition-transform shadow-lg shadow-[#00A651]/20 mt-2">
+              <button type="button" onClick={() => setIsTimeSheetOpen(false)} className="w-full h-16 bg-[#2563EB] text-white font-bold text-[18px] rounded-2xl active:scale-95 transition-transform shadow-lg shadow-[#2563EB]/20 mt-2">
                 확인
               </button>
             </motion.div>

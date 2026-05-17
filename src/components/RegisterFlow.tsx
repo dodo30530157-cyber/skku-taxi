@@ -403,11 +403,11 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
 
       const publicKey = {
         challenge: new Uint8Array(32),
-        rp: { name: "SKKU Taxi" },
+        rp: { name: "GACHITA" },
         user: {
           id: new Uint8Array(16),
           name: email || "user@skku.edu",
-          displayName: nickname || "스꾸택시 유저"
+          displayName: nickname || "가치타 유저"
         },
         pubKeyCredParams: [{ type: "public-key" as const, alg: -7 }],
         authenticatorSelection: { authenticatorAttachment: "platform" as const },
@@ -455,7 +455,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
       <div className="pt-12 pb-4 px-6 bg-white z-20">
         <div className="h-1 w-full bg-[#F2F4F6] rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-[#00A651] rounded-full"
+            className="h-full bg-[#2563EB] rounded-full"
             initial={{ width: '20%' }}
             animate={{ width: `${(step / 5) * 100}%` }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -487,12 +487,12 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                       </h2>
                     </div>
 
-                    <div className="w-36 h-36 rounded-full bg-[#00A651]/5 flex items-center justify-center relative">
-                      <ScanFace className="w-16 h-16 text-[#00A651]" />
+                    <div className="w-36 h-36 rounded-full bg-[#2563EB]/5 flex items-center justify-center relative">
+                      <ScanFace className="w-16 h-16 text-[#2563EB]" />
                       <motion.div
                         animate={{ scale: [1, 1.15, 1] }}
                         transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                        className="absolute inset-0 border-[3px] border-[#00A651]/20 rounded-full"
+                        className="absolute inset-0 border-[3px] border-[#2563EB]/20 rounded-full"
                       />
                     </div>
 
@@ -500,7 +500,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                       <button 
                         onClick={handleFaceIdLogin} 
                         disabled={isFaceIdAuthenticating}
-                        className="w-full h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all shadow-[0_8px_20px_rgba(0,166,81,0.2)] disabled:opacity-50"
+                        className="w-full h-14 rounded-xl bg-[#2563EB] text-white font-bold text-[17px] hover:bg-[#1D4ED8] active:scale-95 transition-all shadow-[0_8px_20px_rgba(0,166,81,0.2)] disabled:opacity-50"
                       >
                         {isFaceIdAuthenticating ? '인증 중...' : 'Face ID로 1초 만에 시작하기'}
                       </button>
@@ -529,7 +529,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                         <div className="space-y-4">
                           <div className="space-y-1.5">
                             <label className="text-sm font-semibold text-gray-600 block pl-1">이메일</label>
-                            <div className="relative flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#00A651] transition-all overflow-hidden">
+                            <div className="relative flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#2563EB] transition-all overflow-hidden">
                               <input
                                 type="email"
                                 placeholder="가입했던 학교 이메일"
@@ -543,7 +543,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                           </div>
                           <div className="space-y-1.5">
                             <label className="text-sm font-semibold text-gray-600 block pl-1">비밀번호</label>
-                            <div className="relative flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#00A651] transition-all overflow-hidden">
+                            <div className="relative flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#2563EB] transition-all overflow-hidden">
                               <input
                                 type="password"
                                 placeholder="비밀번호 입력"
@@ -564,7 +564,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                             <button 
                               onClick={(e) => { e.preventDefault(); handleFaceIdLogin(); }}
                               disabled={isFaceIdAuthenticating}
-                              className="w-full h-14 rounded-xl bg-[#00A651]/10 text-[#00A651] font-bold text-[16px] hover:bg-[#00A651]/20 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 border border-[#00A651]/20"
+                              className="w-full h-14 rounded-xl bg-[#2563EB]/10 text-[#2563EB] font-bold text-[16px] hover:bg-[#2563EB]/20 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 border border-[#2563EB]/20"
                             >
                               <ScanFace className="w-5 h-5" />
                               {isFaceIdAuthenticating ? '인증 중...' : '📱 Face ID로 1초 만에 로그인하기'}
@@ -589,7 +589,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                                   setIsOtpSent(false)
                                 }}
                                 onFocus={() => setIsDropdownOpen(true)}
-                                className="w-full h-14 pl-12 pr-4 rounded-2xl bg-[#F2F4F6] border-none text-gray-900 font-medium focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all"
+                                className="w-full h-14 pl-12 pr-4 rounded-2xl bg-[#F2F4F6] border-none text-gray-900 font-medium focus:outline-none focus:ring-1 focus:ring-[#2563EB] transition-all"
                               />
                             </div>
 
@@ -629,7 +629,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                           <div className="space-y-1.5">
                             <label className="text-sm font-semibold text-gray-600 block pl-1">학교 이메일</label>
                             <div className="flex gap-2">
-                              <div className="relative flex-1 flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#00A651] transition-all overflow-hidden">
+                              <div className="relative flex-1 flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#2563EB] transition-all overflow-hidden">
                                 <input
                                   type="text"
                                   placeholder="아이디"
@@ -670,7 +670,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                                   maxLength={6}
                                   value={code}
                                   onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
-                                  className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all tracking-[0.2em] text-lg text-center"
+                                  className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2563EB] transition-all tracking-[0.2em] text-lg text-center"
                                 />
                                 {authError && (
                                   <p className="text-red-500 text-sm font-medium pl-1 pt-1">{authError}</p>
@@ -708,7 +708,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                 <div className="space-y-8">
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-gray-600 block pl-1">비밀번호 설정</label>
-                    <div className="relative flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#00A651] transition-all overflow-hidden">
+                    <div className="relative flex items-center h-14 rounded-2xl bg-[#F2F4F6] px-4 focus-within:ring-1 focus-within:ring-[#2563EB] transition-all overflow-hidden">
                       <input
                         type="password"
                         placeholder="6자리 이상 입력해주세요"
@@ -730,7 +730,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
               <div className="space-y-10">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 tracking-tight leading-snug mb-2">
-                    스꾸택시에서 사용할<br />프로필을 만들어주세요 ✨
+                    가치타에서 사용할<br />프로필을 만들어주세요 ✨
                   </h2>
                 </div>
 
@@ -770,7 +770,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                       placeholder="성대멋쟁이"
                       value={nickname}
                       onChange={(e) => setNickname(e.target.value)}
-                      className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#00A651] transition-all text-[16px]"
+                      className="w-full h-14 px-4 rounded-2xl bg-[#F2F4F6] border-none font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2563EB] transition-all text-[16px]"
                     />
                   </div>
 
@@ -786,7 +786,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                       <button
                         onClick={() => setIsDisabled(!isDisabled)}
                         className={`relative shrink-0 w-[52px] h-8 rounded-full transition-colors duration-300 ${
-                          isDisabled ? 'bg-[#00A651]' : 'bg-gray-300'
+                          isDisabled ? 'bg-[#2563EB]' : 'bg-gray-300'
                         }`}
                       >
                         <motion.div
@@ -805,7 +805,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                           exit={{ opacity: 0, height: 0 }}
                           className="pt-3 border-t border-gray-200/60 mt-3"
                         >
-                          <p className="text-[13px] text-[#00A651] font-semibold break-keep leading-relaxed">
+                          <p className="text-[13px] text-[#2563EB] font-semibold break-keep leading-relaxed">
                             ✓ 교통약자 아이콘이 프로필에 표시되며,<br />
                             ✓ 탑승 시 휠체어 수납 등 필요한 배려를 받을 수 있습니다.
                           </p>
@@ -837,7 +837,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                       <select
                         value={selectedBank}
                         onChange={(e) => setSelectedBank(e.target.value)}
-                        className="w-full h-14 pl-4 pr-10 rounded-xl bg-white border border-gray-100 font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#00A651] focus:border-transparent appearance-none transition-shadow text-[15px] shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
+                        className="w-full h-14 pl-4 pr-10 rounded-xl bg-white border border-gray-100 font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent appearance-none transition-shadow text-[15px] shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
                       >
                         {BANKS.map((bank) => (
                           <option key={bank} value={bank}>{bank}</option>
@@ -853,7 +853,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                         placeholder="계좌번호 (- 없이 입력)"
                         value={accountNumber}
                         onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-full h-14 px-4 rounded-xl bg-white border border-gray-100 font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00A651] focus:border-transparent transition-shadow text-[15px] shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
+                        className="w-full h-14 px-4 rounded-xl bg-white border border-gray-100 font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-shadow text-[15px] shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                   </div>
@@ -873,12 +873,12 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                   </p>
                 </div>
 
-                <div className="w-36 h-36 rounded-full bg-[#00A651]/5 flex items-center justify-center relative">
-                  <ScanFace className="w-16 h-16 text-[#00A651]" />
+                <div className="w-36 h-36 rounded-full bg-[#2563EB]/5 flex items-center justify-center relative">
+                  <ScanFace className="w-16 h-16 text-[#2563EB]" />
                   <motion.div
                     animate={{ scale: [1, 1.15, 1] }}
                     transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                    className="absolute inset-0 border-[3px] border-[#00A651]/20 rounded-full"
+                    className="absolute inset-0 border-[3px] border-[#2563EB]/20 rounded-full"
                   />
                 </div>
 
@@ -886,7 +886,7 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
                   <button 
                     onClick={handleRegisterBiometrics} 
                     disabled={isFaceIdAuthenticating}
-                    className="w-full h-14 rounded-xl bg-[#00A651] text-white font-bold text-[17px] hover:bg-[#008f46] active:scale-95 transition-all shadow-[0_8px_20px_rgba(0,166,81,0.2)] disabled:opacity-50"
+                    className="w-full h-14 rounded-xl bg-[#2563EB] text-white font-bold text-[17px] hover:bg-[#1D4ED8] active:scale-95 transition-all shadow-[0_8px_20px_rgba(0,166,81,0.2)] disabled:opacity-50"
                   >
                     {isFaceIdAuthenticating ? '인증 중...' : 'Face ID 등록하기'}
                   </button>
@@ -944,12 +944,12 @@ export function RegisterFlow({ onComplete }: { onComplete?: () => void }) {
           <div className="bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
             <div className="p-6 overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">개인정보 처리방침</h2>
-              <p className="text-sm text-gray-600 mb-4 font-medium">성균관대학교 학생 전용 택시 동승 매칭 서비스 'SKKU TAXI'는 이용자의 개인정보를 소중하게 다룹니다.</p>
+              <p className="text-sm text-gray-600 mb-4 font-medium">성균관대학교 학생 전용 택시 동승 매칭 서비스 '가치타(GACHITA)'는 이용자의 개인정보를 소중하게 다룹니다.</p>
               
               <div className="space-y-4">
                 <p className="text-sm text-gray-700 leading-relaxed">
                   <strong>제1조 (목적)</strong><br />
-                  본 방침은 성균관대학교 학생 전용 택시 동승 매칭 서비스 'SKKU TAXI'(이하 ‘서비스’)가 이용자의 개인정보를 어떻게 수집, 이용, 보호하는지 안내하기 위해 작성되었습니다.
+                  본 방침은 성균관대학교 학생 전용 택시 동승 매칭 서비스 '가치타(GACHITA)'(이하 ‘서비스’)가 이용자의 개인정보를 어떻게 수집, 이용, 보호하는지 안내하기 위해 작성되었습니다.
                 </p>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   <strong>제2조 (수집 항목)</strong><br />

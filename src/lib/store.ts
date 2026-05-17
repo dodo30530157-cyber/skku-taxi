@@ -6,6 +6,8 @@ interface UserStore {
   nickname: string | null
   setNickname: (nickname: string | null) => void
   clearUser: () => void
+  blockedUsers: string[]
+  blockUser: (userId: string) => void
 }
 
 export const useUserStore = create<UserStore>((set) => ({
@@ -36,4 +38,13 @@ export const useUserStore = create<UserStore>((set) => ({
     }
     set({ profileImageUrl: null, nickname: null })
   },
+  blockedUsers: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('blockedUsers') || '[]') : [],
+  blockUser: (userId: string) => set((state) => {
+    if (state.blockedUsers.includes(userId)) return state
+    const newBlocked = [...state.blockedUsers, userId]
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('blockedUsers', JSON.stringify(newBlocked))
+    }
+    return { blockedUsers: newBlocked }
+  }),
 }))

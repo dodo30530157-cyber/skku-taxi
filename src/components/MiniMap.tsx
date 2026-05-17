@@ -152,10 +152,10 @@ export function MiniMap({ lat: rawLat, lng: rawLng, destLat: rawDestLat, destLng
           {useCustomPin ? (
             <CustomOverlayMap position={{ lat, lng }} yAnchor={1.3}>
               <div className="flex flex-col items-center" style={{ transform: 'translateX(-50%)' }}>
-                <div className="bg-[#00A651] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md mb-1 whitespace-nowrap">
+                <div className="bg-[#2563EB] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md mb-1 whitespace-nowrap">
                   출발
                 </div>
-                <div className="w-0.5 h-2 bg-[#00A651]/60" />
+                <div className="w-0.5 h-2 bg-[#2563EB]/60" />
                 <img
                   src={profileImageUrl!}
                   alt="내 위치"
@@ -191,12 +191,12 @@ export function MiniMap({ lat: rawLat, lng: rawLng, destLat: rawDestLat, destLng
               <MapMarker position={{ lat: Number(destLat), lng: Number(destLng) }} />
               <CustomOverlayMap position={{ lat: Number(destLat), lng: Number(destLng) }} zIndex={4}>
                 <div className="absolute -translate-x-1/2 -translate-y-full pb-1">
-                  <div className="bg-[#00A651] text-white text-[10px] px-2 py-1 rounded-lg shadow-md max-w-[150px] truncate whitespace-nowrap flex items-center gap-1">
+                  <div className="bg-[#2563EB] text-white text-[10px] px-2 py-1 rounded-lg shadow-md max-w-[150px] truncate whitespace-nowrap flex items-center gap-1">
                     <span>🚩</span>
-                    <span className="text-green-200 font-normal">도착지:</span>
+                    <span className="text-blue-200 font-normal">도착지:</span>
                     <span className="font-bold truncate">{destinationName || "미상"}</span>
                   </div>
-                  <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-[#00A651] absolute -bottom-1 left-1/2 -translate-x-1/2" />
+                  <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-[#2563EB] absolute -bottom-1 left-1/2 -translate-x-1/2" />
                 </div>
               </CustomOverlayMap>
             </>

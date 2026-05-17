@@ -280,160 +280,164 @@ export function PostCard({ post }: { post: PostProps }) {
   })()
 
   return (
-    <div className="w-full rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      {/* 헤더 영역 */}
-      <div className="px-5 pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              {isAuthor && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold shrink-0">내 글</span>}
-              {isUrgent && <span className="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold shrink-0 animate-pulse">⚡ 급구</span>}
-              {post.gender_condition === 'SAME' && <span className="text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-bold shrink-0">동성만</span>}
-              {post.campus && <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium shrink-0">{post.campus}</span>}
+    <div className={`relative w-full rounded-2xl border border-gray-100 shadow-sm transition-all duration-300 overflow-hidden ${
+      isClosed 
+        ? 'bg-gray-50 grayscale pointer-events-none' 
+        : 'bg-white hover:shadow-md hover:-translate-y-1'
+    }`}>
+      {isClosed && (
+        <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+          <div className="px-5 py-2.5 bg-gray-800 text-white font-bold text-sm rounded-xl shadow-md tracking-wide">
+            {isExpired ? "시간이 만료된 방입니다!" : "종료된 탑승입니다"}
+          </div>
+        </div>
+      )}
+      <div className="p-5">
+        {/* 상단 영역 (시간 & 상태 배지) */}
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex flex-col gap-2">
+            <div className="text-lg font-bold text-gray-900">
+              {formatDate(post.departureTime)}
             </div>
-            <h3 className="font-bold text-gray-900 text-base leading-tight truncate">{post.title}</h3>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {isAuthor && <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">내 글</span>}
+              {isUrgent && <span className="text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded font-medium animate-pulse">⚡ 급구</span>}
+              {post.gender_condition === 'SAME' && <span className="text-[10px] bg-purple-50 text-purple-500 px-1.5 py-0.5 rounded font-medium">동성만</span>}
+              {post.campus && <span className="text-[10px] bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded font-medium">{post.campus}</span>}
+            </div>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-              status === '모집중' && !isClosed ? 'bg-[#006341]/10 text-[#006341]' : 'bg-gray-100 text-gray-500'
+            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+              isClosed ? 'bg-gray-200 text-gray-500' : 'bg-blue-50 text-blue-600'
             }`}>
-              {isExpired ? '시간 만료' : isFull ? '마감' : status}
+              {isClosed ? '모집 마감' : '모집 중'}
             </span>
-            <button 
-              onClick={(e) => { e.stopPropagation(); handleDelete(); }} 
-              className="text-red-400 hover:text-red-600 transition-colors bg-red-50 hover:bg-red-100 p-1.5 rounded-full"
-              title="게시글 삭제"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
+            {isAuthor && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleDelete(); }} 
+                className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                title="게시글 삭제"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
-        {/* 출발 → 도착 */}
-        <div className="flex items-center gap-2 text-sm mb-2">
-          <MapPin className="w-4 h-4 text-[#006341] shrink-0" />
-          <span className="font-semibold text-gray-900 truncate">{post.departure}</span>
-          <ArrowRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-          <span className="font-semibold text-gray-900 truncate">{post.destination}</span>
-        </div>
+        <h3 className="text-sm font-medium text-gray-700 mb-6 line-clamp-2">{post.title}</h3>
 
-        {/* 시간 */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-          <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-          <span>{formatDate(post.departureTime)} {t('post.time.prefix')}</span>
+        {/* 중앙 영역 (경로 타임라인 시각화) */}
+        <div className="relative mb-6">
+          {/* 점선 */}
+          <div className="absolute left-[4px] top-[14px] bottom-[14px] w-0 border-l-2 border-dashed border-gray-200"></div>
+          
+          <div className="pl-6 pb-5 relative">
+            <div className="absolute left-0 top-1.5 w-2.5 h-2.5 bg-gray-300 rounded-full ring-4 ring-white z-10"></div>
+            <p className="text-[11px] font-medium text-gray-400 mb-0.5">출발</p>
+            <p className="font-bold text-gray-900 text-[15px]">{post.departure}</p>
+          </div>
+          
+          <div className="pl-6 relative">
+            <div className="absolute left-0 top-1.5 w-2.5 h-2.5 bg-blue-500 rounded-full ring-4 ring-white z-10"></div>
+            <p className="text-[11px] font-medium text-gray-400 mb-0.5">도착</p>
+            <p className="font-bold text-gray-900 text-[15px]">{post.destination}</p>
+          </div>
         </div>
 
         {/* 미니맵 */}
         {post.dep_lat && post.dep_lng && (
-          <MiniMap 
-            lat={post.dep_lat} 
-            lng={post.dep_lng} 
-            destLat={post.dest_lat} 
-            destLng={post.dest_lng}
-            departureName={post.departure}
-            destinationName={post.destination}
-          />
+          <div className="mb-6">
+            <MiniMap 
+              lat={post.dep_lat} 
+              lng={post.dep_lng} 
+              destLat={post.dest_lat} 
+              destLng={post.dest_lng}
+              departureName={post.departure}
+              destinationName={post.destination}
+            />
+          </div>
         )}
 
-        {/* 인원 프로그레스 바 */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1.5 text-gray-500">
-              <Users className="w-3.5 h-3.5 text-blue-400" />
-              <span className="font-medium text-gray-800">{currentPeople}명</span> / {post.maxPeople}명 모집 중
-            </span>
-            <span className={`font-semibold text-xs ${
-              currentPeople >= post.maxPeople ? 'text-red-500' :
-              currentPeople >= post.maxPeople * 0.75 ? 'text-orange-500' : 'text-[#006341]'
-            }`}>
-              {currentPeople >= post.maxPeople ? '마감' : `${post.maxPeople - currentPeople}자리 남음`}
-            </span>
+        {/* 하단 영역 (인원수 현황) */}
+        <div className="border-t border-gray-50 pt-5 mb-1 flex items-center justify-between">
+          <div className="text-sm font-medium text-gray-500">
+            모집 인원
           </div>
-          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                isEarlyDeparted ? 'bg-orange-400' :
-                currentPeople >= post.maxPeople ? 'bg-red-400' : 'bg-[#006341]'
-              }`}
-              style={{ width: `${Math.min((currentPeople / post.maxPeople) * 100, 100)}%` }}
-            />
+          <div className="flex items-baseline gap-0.5">
+            <span className={`text-[22px] font-bold leading-none ${isClosed ? 'text-gray-500' : 'text-blue-600'}`}>{currentPeople}</span>
+            <span className="text-xs text-gray-400 font-medium ml-0.5">/ {post.maxPeople}명</span>
           </div>
         </div>
 
-        {!isAuthor && isClosed && (
-          <div className="bg-blue-50 text-blue-700 p-2.5 rounded-xl text-xs font-medium border border-blue-100 text-center">
-            {isExpired ? '출발 시간이 지나 마감된 합승입니다. ⏳' : '모집이 마감되었습니다. 방장이 택시를 호출합니다! 🚕'}
-          </div>
-        )}
-      </div>
-      {/* 액션 버튼 영역 */}
-      <div className="px-5 pb-4 pt-1 flex flex-col gap-2">
-        {isAuthor ? (
-          <div className="w-full">
-            {status === '모집중' && !isFull ? (
-              <Button
-                variant="outline"
-                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200 font-semibold rounded-xl"
-                onClick={handleEarlyDeparture}
-                disabled={currentPeople < 2 || isLoading}
-              >
-                {currentPeople < 2 ? '2명 이상 모여야 조기 출발 가능' : '🏃‍♂️ 지금 바로 출발하기'}
-              </Button>
-            ) : (
-              <Button
-                className="w-full bg-[#181919] hover:bg-[#181919]/90 text-white font-semibold flex items-center justify-center gap-2 rounded-xl"
-                onClick={handleKakaoT}
-              >
-                <Navigation className="w-4 h-4" />
-                🚕 카카오 T로 택시 부르기
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="w-full flex flex-col gap-2">
-            {isJoined ? (
-              <>
+        {/* 액션 버튼 영역 */}
+        <div className="mt-5 flex flex-col gap-2">
+          {isAuthor ? (
+            <div className="w-full">
+              {status === '모집중' && !isFull ? (
                 <Button
                   variant="outline"
-                  className="w-full bg-[#006341]/10 hover:bg-[#006341]/20 text-[#006341] border-none font-semibold flex items-center justify-center gap-2 rounded-xl"
-                  onClick={() => router.push(`/chat/${post.id}`)}
+                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 border-none font-semibold rounded-xl h-11"
+                  onClick={handleEarlyDeparture}
+                  disabled={currentPeople < 2 || isLoading}
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  채팅방 입장
+                  {currentPeople < 2 ? '2명 이상 모여야 조기 출발 가능' : '🏃‍♂️ 지금 바로 출발하기'}
                 </Button>
-                {isFull && post.toss_id && (
+              ) : (
+                <Button
+                  className="w-full bg-[#181919] hover:bg-[#181919]/90 text-white font-semibold flex items-center justify-center gap-2 rounded-xl h-11"
+                  onClick={handleKakaoT}
+                >
+                  <Navigation className="w-4 h-4" />
+                  🚕 카카오 T로 택시 부르기
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="w-full flex flex-col gap-2">
+              {isJoined ? (
+                <>
                   <Button
-                    className="w-full bg-[#3182F6] hover:bg-[#1C6CD9] text-white font-semibold flex items-center justify-center gap-2 border-none rounded-xl"
-                    onClick={() => window.open(`https://toss.me/${post.toss_id}`, '_blank')}
+                    variant="outline"
+                    className="w-full bg-[#0047FF]/10 hover:bg-[#0047FF]/20 text-[#0047FF] border-none font-semibold flex items-center justify-center gap-2 rounded-xl h-11"
+                    onClick={() => router.push(`/chat/${post.id}`)}
                   >
-                    💸 토스로 정산하기
+                    <MessageSquare className="w-4 h-4" />
+                    채팅방 입장
                   </Button>
-                )}
-              </>
-            ) : (
-              <Button
-                className={`w-full font-semibold rounded-xl ${
-                  isClosed ? 'bg-gray-100 text-gray-400 hover:bg-gray-100 cursor-not-allowed' : 'bg-[#006341] hover:bg-[#006341]/90 text-white'
-                }`}
-                onClick={handleJoin}
-                disabled={isClosed || isLoading}
-              >
-                {isLoading ? '처리 중...' : isExpired ? '마감된 합승입니다' : isFull ? '모집이 마감되었습니다' : '합승 참여하기'}
-              </Button>
-            )}
-          </div>
-        )}
+                  {isFull && post.toss_id && (
+                    <Button
+                      className="w-full bg-[#3182F6] hover:bg-[#1C6CD9] text-white font-semibold flex items-center justify-center gap-2 border-none rounded-xl h-11"
+                      onClick={() => window.open(`https://toss.me/${post.toss_id}`, '_blank')}
+                    >
+                      💸 토스로 정산하기
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <Button
+                  className={`w-full font-semibold rounded-xl h-11 ${
+                    isClosed ? 'bg-gray-100 text-gray-400 hover:bg-gray-100 cursor-not-allowed' : 'bg-[#0047FF] hover:bg-[#0047FF]/90 text-white'
+                  }`}
+                  onClick={handleJoin}
+                  disabled={isClosed || isLoading}
+                >
+                  {isLoading ? '처리 중...' : isExpired ? '마감된 합승입니다' : isFull ? '모집이 마감되었습니다' : '합승 참여하기'}
+                </Button>
+              )}
+            </div>
+          )}
 
-        {/* 소통하기 버튼 */}
-        <div className="border-t border-gray-50 pt-2 flex justify-center">
-          <Button
-            variant="ghost"
-            onClick={() => setIsChatOpen(!isChatOpen)}
-            className="text-gray-400 hover:text-gray-600 h-8 text-xs font-medium w-full flex gap-1.5"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            {isChatOpen ? '소통창 닫기' : '💬 소통하기'}
-          </Button>
+          {/* 소통하기 버튼 */}
+          <div className="pt-2 flex justify-center">
+            <Button
+              variant="ghost"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className="text-gray-400 hover:text-gray-600 h-9 text-xs font-medium w-full flex gap-1.5 rounded-xl"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              {isChatOpen ? '소통창 닫기' : '💬 소통하기'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -459,7 +463,7 @@ export function PostCard({ post }: { post: PostProps }) {
                     )}
                     <div className={`px-3 py-2 rounded-2xl text-[13px] leading-snug break-all ${
                       isMe
-                        ? 'bg-[#00A651] text-white rounded-br-sm'
+                        ? 'bg-[#2563EB] text-white rounded-br-sm'
                         : 'bg-gray-100 text-gray-800 rounded-bl-sm'
                     }`}>
                       {c.content}
@@ -471,7 +475,7 @@ export function PostCard({ post }: { post: PostProps }) {
                     profileImageUrl ? (
                       <img src={profileImageUrl} alt="나" className="w-7 h-7 rounded-full object-cover shrink-0 self-end" />
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-[#00A651] flex items-center justify-center shrink-0 self-end">
+                      <div className="w-7 h-7 rounded-full bg-[#2563EB] flex items-center justify-center shrink-0 self-end">
                         <User className="w-3.5 h-3.5 text-white" />
                       </div>
                     )
@@ -501,7 +505,7 @@ export function PostCard({ post }: { post: PostProps }) {
                 }}
               />
               <Button
-                className="h-9 px-3 bg-[#006341] hover:bg-[#006341]/90 text-white text-xs shrink-0"
+                className="h-9 px-3 bg-[#0047FF] hover:bg-[#0047FF]/90 text-white text-xs shrink-0"
                 onClick={handleCommentSubmit}
                 disabled={isCommentLoading || !nicknameInput.trim() || !commentInput.trim()}
               >

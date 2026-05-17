@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useUserStore } from '@/lib/store'
-import { ArrowLeft, Send, Users, MapPin, Clock, Copy, Check, User } from 'lucide-react'
+import { ArrowLeft, Send, Users, MapPin, Clock, Copy, Check, User, MoreVertical } from 'lucide-react'
 
 interface Message {
   id: string
@@ -26,6 +26,7 @@ interface Post {
   note?: string
   bank_name?: string
   account_number?: string
+  user_id?: string
 }
 
 export default function ChatRoomPage() {
@@ -33,6 +34,8 @@ export default function ChatRoomPage() {
   const router = useRouter()
   const postId = params.id as string
   const profileImageUrl = useUserStore((state) => state.profileImageUrl)
+  const blockedUsers = useUserStore((state) => state.blockedUsers)
+  const blockUser = useUserStore((state) => state.blockUser)
 
   const [post, setPost] = useState<Post | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -42,6 +45,7 @@ export default function ChatRoomPage() {
   const [sending, setSending] = useState(false)
   const [copied, setCopied] = useState(false)
   const [copyMsg, setCopyMsg] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   // 초기 세팅
@@ -193,18 +197,45 @@ export default function ChatRoomPage() {
         </div>
         <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${
           post?.status === '모집중'
-            ? 'bg-[#006341]/10 text-[#006341]'
+            ? 'bg-[#0047FF]/10 text-[#0047FF]'
             : 'bg-gray-100 text-gray-500'
         }`}>
           {post?.status || '모집중'}
         </span>
+
+        {/* 미트볼 메뉴 (신고 및 차단) */}
+        <div className="relative">
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
+          {showDropdown && (
+            <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
+              <button
+                onClick={() => {
+                  setShowDropdown(false)
+                  const confirmed = window.confirm("이 사용자를 차단하시겠습니까?\n차단 시 서로의 팟 목록과 채팅이 보이지 않습니다.")
+                  if (confirmed) {
+                    blockUser(post?.user_id || 'post_author')
+                    alert("정상적으로 차단 및 신고가 접수되었습니다.")
+                  }
+                }}
+                className="w-full text-left px-4 py-3.5 text-[13px] font-bold text-red-500 hover:bg-red-50 transition-colors active:bg-red-100"
+              >
+                신고 및 차단하기
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 출발 시간 띠 */}
       {post?.departureTime && (
-        <div className="bg-[#006341]/5 border-b border-[#006341]/10 px-4 py-2 flex items-center gap-2 shrink-0">
-          <Clock className="w-3.5 h-3.5 text-[#006341]" />
-          <span className="text-xs text-[#006341] font-medium">
+        <div className="bg-[#0047FF]/5 border-b border-[#0047FF]/10 px-4 py-2 flex items-center gap-2 shrink-0">
+          <Clock className="w-3.5 h-3.5 text-[#0047FF]" />
+          <span className="text-xs text-[#0047FF] font-medium">
             출발 시간: {new Date(post.departureTime).toLocaleString('ko-KR', {
               month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
             })}
@@ -214,9 +245,9 @@ export default function ChatRoomPage() {
 
       {/* 계좌 정산 배너 */}
       {hasAccount && (
-        <div className="shrink-0 mx-4 mt-3 bg-white border border-emerald-100 rounded-2xl shadow-sm overflow-hidden">
-          <div className="bg-[#006341]/5 px-4 py-2 border-b border-emerald-100">
-            <p className="text-xs font-bold text-[#006341]">💳 방장에게 송금하기</p>
+        <div className="shrink-0 mx-4 mt-3 bg-white border border-blue-100 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-[#0047FF]/5 px-4 py-2 border-b border-blue-100">
+            <p className="text-xs font-bold text-[#0047FF]">💳 방장에게 송금하기</p>
           </div>
           <div className="px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
@@ -228,8 +259,8 @@ export default function ChatRoomPage() {
                 onClick={handleCopyAccount}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                   copied
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-[#006341] text-white hover:bg-[#006341]/90 active:scale-95'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-[#0047FF] text-white hover:bg-[#0047FF]/90 active:scale-95'
                 }`}
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -245,7 +276,7 @@ export default function ChatRoomPage() {
           </div>
           {copyMsg && (
             <div className="px-4 pb-3">
-              <p className="text-xs text-emerald-600 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
+              <p className="text-xs text-blue-600 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
                 ✅ {copyMsg}
               </p>
             </div>
@@ -269,7 +300,7 @@ export default function ChatRoomPage() {
         {/* 환영 메시지 */}
         {showWelcome && (
           <div className="flex justify-center animate-in fade-in slide-in-from-top-2 duration-500">
-            <div className="bg-[#006341] text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg text-center max-w-xs">
+            <div className="bg-[#0047FF] text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-lg text-center max-w-xs">
               🎉 합승이 시작되었습니다!<br />
               <span className="text-white/80 font-normal text-xs">팀원들과 인사를 나눠보세요</span>
             </div>
@@ -286,7 +317,7 @@ export default function ChatRoomPage() {
         )}
 
         {/* 메시지 없을 때 */}
-        {messages.length === 0 && !showWelcome && (
+        {messages.filter(msg => !blockedUsers.includes(msg.nickname)).length === 0 && !showWelcome && (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <p className="text-4xl mb-3">💬</p>
             <p className="text-sm font-medium">아직 메시지가 없습니다</p>
@@ -295,7 +326,7 @@ export default function ChatRoomPage() {
         )}
 
         {/* 채팅 메시지 목록 */}
-        {messages.map((msg) => {
+        {messages.filter(msg => !blockedUsers.includes(msg.nickname)).map((msg) => {
           const isMine = msg.nickname === nickname
           return (
             <div key={msg.id} className={`flex w-full items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
@@ -313,7 +344,7 @@ export default function ChatRoomPage() {
                 )}
                 <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   isMine
-                    ? 'bg-[#00A651] text-white rounded-br-sm'
+                    ? 'bg-[#2563EB] text-white rounded-br-sm'
                     : 'bg-[#F2F4F6] text-gray-800 rounded-bl-sm'
                 }`}>
                   {msg.content}
@@ -330,7 +361,7 @@ export default function ChatRoomPage() {
                     className="w-8 h-8 rounded-full object-cover shrink-0 self-end shadow-sm"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#00A651] flex items-center justify-center shrink-0 self-end">
+                  <div className="w-8 h-8 rounded-full bg-[#2563EB] flex items-center justify-center shrink-0 self-end">
                     <User className="w-4 h-4 text-white" />
                   </div>
                 )
@@ -349,12 +380,12 @@ export default function ChatRoomPage() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
           placeholder="메시지를 입력하세요..."
-          className="flex-1 h-10 px-4 rounded-full border border-gray-200 text-sm focus:outline-none focus:border-[#006341] focus:ring-1 focus:ring-[#006341] transition-colors bg-gray-50"
+          className="flex-1 h-10 px-4 rounded-full border border-gray-200 text-sm focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] transition-colors bg-gray-50"
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || sending}
-          className="w-10 h-10 rounded-full bg-[#006341] flex items-center justify-center text-white shrink-0 disabled:opacity-40 hover:bg-[#006341]/90 transition-all active:scale-95"
+          className="w-10 h-10 rounded-full bg-[#0047FF] flex items-center justify-center text-white shrink-0 disabled:opacity-40 hover:bg-[#0047FF]/90 transition-all active:scale-95"
         >
           <Send className="w-4 h-4" />
         </button>

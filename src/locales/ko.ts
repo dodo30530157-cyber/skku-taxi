@@ -7,11 +7,11 @@ export const ko = {
   'common.search': '검색',
 
   // Layout / Header
-  'header.title': 'SKKU TAXI',
-  'header.subtitle': '성대 택시 합승',
+  'header.title': 'GACHITA',
+  'header.subtitle': '가치타',
 
   // SplashScreen
-  'splash.title': '스꾸택시',
+  'splash.title': 'GACHITA',
 
   // Onboarding
   'onboarding.slide1.title': '혜화역 택시 대기, 이제 끝! 🚕',
@@ -20,7 +20,7 @@ export const ko = {
   'onboarding.slide2.desc': '학우 인증과 동성 필터로 야간에도 안전하게.',
   'onboarding.slide3.title': '내릴 땐 깔끔하게 1/N 정산 💸',
   'onboarding.slide3.desc': '도착 후 어색함 없이 송금 링크로 한 번에 해결.',
-  'onboarding.start': '스꾸택시 시작하기',
+  'onboarding.start': '가치타 시작하기',
 
   // Main Page
   'main.hero.title': '어디로 가시나요? 🚕',
